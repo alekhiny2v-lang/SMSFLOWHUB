@@ -12,12 +12,32 @@ interface Activation {
   phoneNumber: string;
   cost: string;
   status: string;
-  smsCode: string;
+  smsCode: string | null;
   createdAt: string;
 }
 
 export default function ClientHistory() {
   const [activations, setActivations] = useState<Activation[]>([]);
+  const [copiedNumberId, setCopiedNumberId] = useState<number | null>(null);
+  const [copiedOtpId, setCopiedOtpId] = useState<number | null>(null);
+
+  const copyNumber = async (text: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedNumberId(id);
+      setTimeout(() => setCopiedNumberId(null), 1500);
+    } catch { /* ignore */ }
+  };
+
+  const copyOtp = async (text: string | null, id: number) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedOtpId(id);
+      setTimeout(() => setCopiedOtpId(null), 1500);
+    } catch { /* ignore */ }
+  };
+
   const load = () => apiFetch<Activation[]>("/api/client/activations").then(setActivations);
 
   useEffect(() => {
@@ -51,12 +71,34 @@ export default function ClientHistory() {
                     <span className="font-medium text-white">{a.countryName || "-"}</span>
                   </span>
                 </td>
-                <td className="px-5 py-4 font-mono">{a.phoneNumber || "-"}</td>
+                <td className="px-5 py-4 font-mono flex items-center gap-2">
+                  {a.phoneNumber || "-"}
+                  {a.phoneNumber && (
+                    <button
+                      onClick={() => copyNumber(a.phoneNumber || "", a.id)}
+                      className="text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-md transition"
+                      title="Copy number"
+                    >
+                      {copiedNumberId === a.id ? "Copied!" : "Copy"}
+                    </button>
+                  )}
+                </td>
                 <td className="px-5 py-4">PKR {Number(a.cost).toFixed(2)}</td>
                 <td className="px-5 py-4">
                   <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(a.status)}`}>{a.status}</span>
                 </td>
-                <td className="px-5 py-4 font-mono font-bold text-white">{a.smsCode || "-"}</td>
+                <td className="px-5 py-4 font-mono font-bold text-white flex items-center gap-2">
+                  {a.smsCode || "-"}
+                  {a.smsCode ? (
+                    <button
+                      onClick={() => copyOtp(a.smsCode, a.id)}
+                      className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md transition"
+                      title="Copy OTP"
+                    >
+                      {copiedOtpId === a.id ? "Copied!" : "Copy"}
+                    </button>
+                  ) : null}
+                </td>
                 <td className="px-5 py-4">{new Date(a.createdAt).toLocaleString()}</td>
               </tr>
             ))}

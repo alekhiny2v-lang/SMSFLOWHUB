@@ -35,6 +35,32 @@ function formatTime(ms: number) {
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
+function playOtpSound() {
+  try {
+    const AudioCtx = (window as any).AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const playNote = (freq: number, start: number, duration: number, gainVal: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      gain.gain.setValueAtTime(gainVal, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(gainVal * 0.01, ctx.currentTime + start + duration);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + start + duration);
+    };
+    // Pleasant chime: C5 -> E5 -> G5 ascending
+    playNote(523, 0, 0.25, 0.15);
+    playNote(659, 0.12, 0.25, 0.15);
+    playNote(784, 0.22, 0.35, 0.15);
+  } catch {
+    // ignore audio errors
+  }
+}
+
 export default function BuyNumber() {
   const [prices, setPrices] = useState<Price[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +69,10 @@ export default function BuyNumber() {
   const [activations, setActivations] = useState<Activation[]>([]);
   const [processing, setProcessing] = useState<Set<number>>(new Set());
   const activationsRef = useRef(activations);
+
+  const [copiedNumberId, setCopiedNumberId] = useState<number | null>(null);
+  const [copiedOtpId, setCopiedOtpId] = useState<number | null>(null);
+  const playedSoundIds = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     activationsRef.current = activations;
@@ -82,6 +112,16 @@ export default function BuyNumber() {
     return () => clearInterval(countdown);
   }, []);
 
+  // Sound effect when new OTP arrives
+  useEffect(() => {
+    activations.forEach((a) => {
+      if (a.smsCode && a.smsCode.trim() !== "" && !playedSoundIds.current.has(a.id)) {
+        playedSoundIds.current.add(a.id);
+        playOtpSound();
+      }
+    });
+  }, [activations]);
+
   const pollActivation = async (id: number) => {
     try {
       const updated = await apiFetch<Activation>(`/api/client/activations/${id}`);
@@ -114,6 +154,27 @@ export default function BuyNumber() {
       setError((e as Error).message);
     } finally {
       setBuying(null);
+    }
+  };
+
+  const copyNumber = async (text: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedNumberId(id);
+      setTimeout(() => setCopiedNumberId(null), 1500);
+    } catch {
+      // ignore
+    }
+  };
+
+  const copyOtp = async (text: string | null, id: number) => {
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedOtpId(id);
+      setTimeout(() => setCopiedOtpId(null), 1500);
+    } catch {
+      // ignore
     }
   };
 
@@ -169,7 +230,18 @@ export default function BuyNumber() {
                     <span className="text-4xl">{getCountryFlagByName(a.countryName)}</span>
                     <div>
                       <p className="font-bold text-white text-lg">{a.countryName || "Unknown"}</p>
-                      <p className="text-slate-400 text-sm font-mono">{a.phoneNumber || "-"}</p>
+                      <p className="text-slate-400 text-sm font-mono flex items-center gap-2">
+                        {a.phoneNumber || "-"}
+                        {a.phoneNumber && (
+                          <button
+                            onClick={() => copyNumber(a.phoneNumber || "", a.id)}
+                            className="ml-1 text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-md transition"
+                            title="Copy number"
+                          >
+                            {copiedNumberId === a.id ? "Copied!" : "Copy"}
+                          </button>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -184,7 +256,16 @@ export default function BuyNumber() {
                 <div className="bg-slate-950/50 rounded-xl p-5 mb-4 text-center border border-white/5">
                   <p className="text-xs text-slate-500 mb-2 uppercase tracking-widest">OTP / SMS Code</p>
                   {a.smsCode ? (
-                    <p className="text-4xl lg:text-5xl font-bold text-emerald-400 font-mono tracking-wider">{a.smsCode}</p>
+                    <div className="flex items-center justify-center gap-3">
+                      <p className="text-4xl lg:text-5xl font-bold text-emerald-400 font-mono tracking-wider">{a.smsCode}</p>
+                      <button
+                        onClick={() => copyOtp(a.smsCode, a.id)}
+                        className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 px-3 py-1.5 rounded-lg transition font-bold"
+                        title="Copy OTP"
+                      >
+                        {copiedOtpId === a.id ? "Copied!" : "Copy OTP"}
+                      </button>
+                    </div>
                   ) : a.status === "cancelled" ? (
                     <p className="text-xl font-bold text-red-400">Cancelled</p>
                   ) : (
