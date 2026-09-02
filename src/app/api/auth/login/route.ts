@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "@/db/query";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { verifyPassword, createSession } from "@/lib/auth";
+import { verifyPassword, createSession, normalizeUsername } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
         status: users.status,
       })
       .from(users)
-      .where(eq(users.username, String(username).trim()));
+      .where(eq(users.username, normalizeUsername(username)));
 
     const user = rows[0];
     if (!user || user.status !== "active") {

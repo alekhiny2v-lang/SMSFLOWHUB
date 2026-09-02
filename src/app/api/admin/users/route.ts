@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq, like, desc } from "@/db/query";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { requireAdmin, hashPassword } from "@/lib/auth";
+import { requireAdmin, hashPassword, normalizeUsername } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
@@ -43,7 +43,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
-    const existing = await db.select({ id: users.id }).from(users).where(eq(users.username, username));
+    const cleanUsername = normalizeUsername(username);
+    const existing = await db.select({ id: users.id }).from(users).where(eq(users.username, cleanUsername));
     if (existing.length > 0) {
       return NextResponse.json({ error: "Username already exists" }, { status: 409 });
     }
@@ -52,7 +53,7 @@ export async function POST(req: NextRequest) {
     const rows = await db
       .insert(users)
       .values({
-        username: String(username).trim(),
+        username: cleanUsername,
         password: hashed,
         role: role === "admin" ? "admin" : "client",
         balance: String(balance),
