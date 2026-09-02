@@ -28,6 +28,14 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
+/**
+ * Single normalization rule for usernames: trim whitespace and lowercase so
+ * registration, login and the admin bootstrap all store/look up the same key.
+ */
+export function normalizeUsername(username: string): string {
+  return String(username).trim().toLowerCase();
+}
+
 export async function createSession(user: SessionUser): Promise<void> {
   const token = await new SignJWT({ ...user })
     .setProtectedHeader({ alg: "HS256" })

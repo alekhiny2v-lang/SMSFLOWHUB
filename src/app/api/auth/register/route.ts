@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "@/db/query";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { hashPassword, createSession } from "@/lib/auth";
+import { hashPassword, createSession, normalizeUsername } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Passwords do not match" }, { status: 400 });
     }
 
-    const cleanUsername = String(username).trim().toLowerCase();
+    const cleanUsername = normalizeUsername(username);
     if (cleanUsername.length < 3) {
       return NextResponse.json({ error: "Username must be at least 3 characters" }, { status: 400 });
     }
