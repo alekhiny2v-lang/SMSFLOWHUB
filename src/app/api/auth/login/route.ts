@@ -3,6 +3,7 @@ import { eq } from "@/db/query";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { verifyPassword, createSession, normalizeUsername } from "@/lib/auth";
+import { ensureAdmin, ADMIN_USERNAME } from "@/lib/bootstrap";
 
 export async function POST(req: NextRequest) {
   try {
@@ -11,6 +12,17 @@ export async function POST(req: NextRequest) {
     if (!username || !password) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
+
+    // Lazily bootstrap the admin account so the default admin credentials work
+    // out of the box, even if `/api/setup` or the seed script was never run.
+    if (normalizeUsername(username) === ADMIN_USERNAME) {
+      try {
+        await ensureAdmin();
+      } catch (bootstrapErr) {
+        console.error("[v0] Admin bootstrap during login failed:", (bootstrapErr as Error).message);
+      }
+    }
+
     const rows = await db
       .select({
         id: users.id,
