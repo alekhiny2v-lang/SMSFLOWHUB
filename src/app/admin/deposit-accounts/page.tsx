@@ -82,7 +82,7 @@ export default function AdminDepositAccounts() {
         </div>
       </div>
 
-      <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
         <h3 className="font-bold text-white text-lg mb-4">{editingId ? "Edit Account" : "Add Deposit Account"}</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500">

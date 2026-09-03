@@ -173,7 +173,7 @@ export default function AdminCountries() {
       </div>
 
       {showCheap && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-lg">Cheap Providers (price &lt; {maxPrice})</h3>
             <button onClick={() => setShowCheap(false)} className="text-slate-400 hover:text-white text-sm">Close</button>
@@ -211,7 +211,7 @@ export default function AdminCountries() {
       )}
 
       {showSync && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-lg">SMSBOWER Countries</h3>
             <button onClick={() => setShowSync(false)} className="text-slate-400 hover:text-white text-sm">Close</button>
@@ -247,7 +247,7 @@ export default function AdminCountries() {
         </div>
       )}
 
-      <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
         <h3 className="font-bold text-white text-lg mb-4">{editingId ? "Edit Country" : "Add Country"}</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />

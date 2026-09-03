@@ -130,7 +130,7 @@ export default function AdminUsers() {
       </div>
 
       {showAdd && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
           <h3 className="font-bold text-white mb-4">Add User</h3>
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
             <input placeholder="Username" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
@@ -149,7 +149,7 @@ export default function AdminUsers() {
       )}
 
       {balanceForm.userId && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
           <h3 className="font-bold text-white mb-4">Update Balance</h3>
           <form onSubmit={handleBalance} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <input placeholder="Amount" type="number" value={balanceForm.amount} onChange={(e) => setBalanceForm({ ...balanceForm, amount: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
@@ -167,7 +167,7 @@ export default function AdminUsers() {
       )}
 
       {ratesUserId && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h3 className="font-bold text-white text-lg">Custom Rates (PKR) — User #{ratesUserId}</h3>
             <div className="flex gap-2">
@@ -210,7 +210,7 @@ export default function AdminUsers() {
       )}
 
       {paymentUserId && (
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-white text-lg">Payment Details — User #{paymentUserId}</h3>
             <button onClick={() => setPaymentUserId(null)} className="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl text-sm transition">Close</button>

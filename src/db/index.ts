@@ -23,6 +23,37 @@ async function getDb() {
   return dbPromise;
 }
 
+/**
+ * Translate a simple predicate tree (eq / and / like with literal values) into a
+ * MongoDB query filter so queries hit the server instead of loading full
+ * collections into memory. Returns undefined when the predicate cannot be
+ * expressed as a Mongo filter (e.g. column-to-column comparisons).
+ */
+function toMongoFilter(predicate?: Predicate): Record<string, unknown> | undefined {
+  if (!predicate) return undefined;
+  if (predicate.andParts) {
+    const merged: Record<string, unknown> = {};
+    for (const part of predicate.andParts) {
+      const filter = toMongoFilter(part);
+      if (!filter) return undefined;
+      Object.assign(merged, filter);
+    }
+    return merged;
+  }
+  if (predicate.likeField && predicate.likeRegex) {
+    const flags = predicate.likeRegex.flags;
+    const options = flags.includes("i") && !flags.includes("I") ? "i" : undefined;
+    const condition: Record<string, unknown> = { $regex: predicate.likeRegex.source };
+    if (options) condition.$options = options;
+    return { [predicate.likeField.field]: condition };
+  }
+  if (predicate.left) {
+    if (predicate.right && typeof predicate.right === "object" && "field" in predicate.right) return undefined;
+    return { [predicate.left.field]: predicate.right };
+  }
+  return undefined;
+}
+
 function field(value: unknown): string | undefined {
   return value && typeof value === "object" && "field" in value ? String((value as Column).field) : undefined;
 }
@@ -56,16 +87,33 @@ class SelectQuery implements PromiseLike<any[]> {
   async then<TResult1 = any[], TResult2 = never>(onfulfilled?: ((value: any[]) => TResult1 | PromiseLike<TResult1>) | null, onrejected?: ((reason: unknown) => TResult2 | PromiseLike<TResult2>) | null) {
     try {
       const collection = (await getDb()).collection(this.source!.collection);
-      let rows = await collection.find({}).toArray() as unknown as Record<string, unknown>[];
+      const mongoFilter = toMongoFilter(this.predicate);
+      // Push the filter down to MongoDB (indexed) instead of scanning the
+      // whole collection and filtering in memory.
+      let rows = await collection.find(mongoFilter ?? {}).toArray() as unknown as Record<string, unknown>[];
       for (const join of this.joins) {
-        const joinedRows = await (await getDb()).collection(join.source.collection).find({}).toArray() as unknown as Record<string, unknown>[];
-        rows = rows.map((row) => {
-          const rightColumn = join.condition.right && typeof join.condition.right === "object" && "field" in join.condition.right ? join.condition.right as Column : undefined;
-          const joined = rightColumn
-            ? joinedRows.find((candidate) => candidate[rightColumn.field] === row[join.condition.left!.field])
-            : undefined;
-          return { ...row, __joined: { ...(row.__joined as object), [join.source.collection]: joined } };
-        });
+        const joinCollection = (await getDb()).collection(join.source.collection);
+        const rightColumn = join.condition.right && typeof join.condition.right === "object" && "field" in join.condition.right ? join.condition.right as Column : undefined;
+        if (join.condition.left && rightColumn) {
+          // Build a hash map once → O(n + m) lookups instead of O(n * m) scans.
+          const byKey = new Map<unknown, Record<string, unknown>>();
+          for (const candidate of (await joinCollection.find({}).toArray()) as unknown as Record<string, unknown>[]) {
+            if (!byKey.has(candidate[rightColumn.field])) byKey.set(candidate[rightColumn.field], candidate);
+          }
+          const leftField = join.condition.left.field;
+          rows = rows.map((row) => ({
+            ...row,
+            __joined: { ...(row.__joined as object), [join.source.collection]: byKey.get(row[leftField]) },
+          }));
+        } else {
+          const joinedRows = (await joinCollection.find({}).toArray()) as unknown as Record<string, unknown>[];
+          rows = rows.map((row) => {
+            const joined = rightColumn
+              ? joinedRows.find((candidate) => candidate[rightColumn.field] === row[join.condition.left!.field])
+              : undefined;
+            return { ...row, __joined: { ...(row.__joined as object), [join.source.collection]: joined } };
+          });
+        }
       }
       if (this.predicate) rows = rows.filter(this.predicate);
       for (const sort of [...this.sorts].reverse()) rows.sort((a, b) => {
@@ -97,12 +145,34 @@ class MutationQuery implements PromiseLike<any[]> {
         const documents = this.valuesList.map((value) => ({ ...value, id: value.id ?? Date.now() + Math.floor(Math.random() * 100000), createdAt: value.createdAt ?? new Date(), updatedAt: value.updatedAt ?? new Date() }));
         if (documents.length) await collection.insertMany(documents);
         result = documents;
+      } else if (this.operation === "update") {
+        const mongoFilter = toMongoFilter(this.predicate);
+        if (mongoFilter) {
+          // One filtered read + one filtered update instead of a full scan +
+          // N writes. Read before the update because the filter may stop
+          // matching after the $set (e.g. status "pending" → "completed").
+          const matched = ((await collection.find(mongoFilter).toArray()) as unknown as Record<string, unknown>[]);
+          if (matched.length > 0) {
+            await collection.updateMany(mongoFilter, { $set: this.changes });
+            result = matched.map((document) => ({ ...document, ...this.changes }));
+          }
+        } else {
+          const documents = await collection.find({}).toArray() as unknown as Record<string, unknown>[];
+          for (const document of documents.filter(this.predicate || (() => true))) {
+            await collection.updateOne({ _id: document._id as any }, { $set: this.changes });
+            result.push({ ...document, ...this.changes });
+          }
+        }
       } else {
-        const documents = await collection.find({}).toArray() as unknown as Record<string, unknown>[];
-        for (const document of documents.filter(this.predicate || (() => true))) {
-          const selector = { _id: document._id as any };
-          if (this.operation === "update") { await collection.updateOne(selector, { $set: this.changes }); result.push({ ...document, ...this.changes }); }
-          else { await collection.deleteOne(selector); result.push(document); }
+        const mongoFilter = toMongoFilter(this.predicate);
+        if (mongoFilter) {
+          await collection.deleteMany(mongoFilter);
+        } else {
+          const documents = await collection.find({}).toArray() as unknown as Record<string, unknown>[];
+          for (const document of documents.filter(this.predicate || (() => true))) {
+            await collection.deleteOne({ _id: document._id as any });
+            result.push(document);
+          }
         }
       }
       const output = result.map((row) => project(row, this.projection));

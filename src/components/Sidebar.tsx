@@ -53,7 +53,7 @@ export function Sidebar({ role, username, balance, onLogout, open, onClose }: Si
       <aside
         className={`
           fixed lg:sticky top-0 left-0 z-50
-          w-72 bg-slate-900/95 backdrop-blur-xl text-white h-screen flex flex-col
+          w-72 bg-slate-900 text-white h-screen flex flex-col
           border-r border-white/10
           transform transition-transform duration-300 ease-out
           ${open ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
@@ -125,7 +125,7 @@ export function MobileHeader({
   balance?: string;
 }) {
   return (
-    <header className="lg:hidden bg-slate-900/95 backdrop-blur-xl border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-30">
+    <header className="lg:hidden bg-slate-900 border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-30">
       <button onClick={onMenuClick} className="text-2xl text-white p-1" aria-label="Open menu">
         ☰
       </button>

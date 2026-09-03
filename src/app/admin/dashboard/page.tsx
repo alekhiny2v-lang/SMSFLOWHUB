@@ -44,7 +44,7 @@ export default function AdminDashboard() {
 
 function StatCard({ title, value, icon, gradient }: { title: string; value: React.ReactNode; icon: string; gradient: string }) {
   return (
-    <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl p-5 card-hover">
+    <div className="bg-slate-900 border border-white/10 rounded-2xl p-5 card-hover">
       <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center mb-4 shadow-lg`}>
         <span className="text-2xl">{icon}</span>
       </div>
