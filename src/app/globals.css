@@ -105,12 +105,14 @@ select.input option {
   pointer-events: none;
 }
 
+/* Painted as radial gradients rather than blurred boxes: a 110px blur on a
+   44rem element forces a huge offscreen buffer on every scroll/repaint, which
+   is what made the panel pages feel sluggish. */
 .page-bg::before,
 .page-bg::after {
   content: "";
   position: absolute;
   border-radius: 9999px;
-  filter: blur(110px);
   opacity: 0.5;
 }
 
@@ -146,16 +148,25 @@ select.input option {
   }
 }
 
+/* The blobs are decorative: keep them soft, but avoid a large `filter: blur()`
+   (an offscreen buffer the compositor must re-render) by using a radial
+   gradient mask instead, and only animate `transform` on capable pointers. */
 .blob {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(90px);
-  animation: blob-drift 20s ease-in-out infinite;
+  /* Feather the edge with a mask instead of blurring the whole layer; the
+     background-color still comes from the utility class on the element. */
+  mask-image: radial-gradient(closest-side, #000 20%, transparent 100%);
+  -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 100%);
+  opacity: 0.9;
+  will-change: transform;
+  transform: translateZ(0);
+  contain: strict;
 }
 
-@media (prefers-reduced-motion: reduce) {
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .blob {
-    animation: none;
+    animation: blob-drift 24s ease-in-out infinite;
   }
 }
 
@@ -235,7 +246,7 @@ select.input option {
 /* Glass effect */
 .glass {
   background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -406,3 +417,48 @@ select.input option {
   }
 }
 
+
+/* ---------- Performance guards ---------- */
+
+/* `backdrop-filter` is the single most expensive effect on this app: every
+   scroll frame re-samples everything painted behind the element. Cap the
+   radius everywhere, and drop it entirely on small screens (phones are where
+   the lag was reported) in favour of a near-opaque background. */
+@media (max-width: 1023px) {
+  .backdrop-blur-xl,
+  .backdrop-blur-lg,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .backdrop-blur-xl {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* Long lists of activation / country cards: let the browser skip layout and
+   paint for the ones scrolled out of view. */
+.list-perf > * {
+  content-visibility: auto;
+  contain-intrinsic-size: 220px;
+}
+
+/* Same trick for compact rows (the country picker list). */
+.list-perf-rows > * {
+  content-visibility: auto;
+  contain-intrinsic-size: 52px;
+}
+
+/* Hover lift only where a real pointer exists — on touch it just triggers
+   sticky repaints. */
+@media (hover: none) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

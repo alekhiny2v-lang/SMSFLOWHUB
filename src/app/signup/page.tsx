@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FacebookLogo } from "@/components/FacebookLogo";
+import { AlertIcon, LockIcon, UserIcon } from "@/components/AuthIcons";
 import { apiFetch } from "@/lib/api";
 
 export default function SignupPage() {
@@ -40,7 +41,7 @@ export default function SignupPage() {
       <div className="blob w-[30rem] h-[30rem] bg-emerald-600/12 -bottom-32 -left-24" style={{ animationDelay: "-8s" }} aria-hidden="true" />
       <div className="blob w-[22rem] h-[22rem] bg-purple-500/12 top-1/4 left-1/3" style={{ animationDelay: "-14s" }} aria-hidden="true" />
 
-      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#1877F2]/10 bg-slate-900/70 backdrop-blur-xl">
+      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#1877F2]/10 bg-slate-900/85">
         {/* ── Brand panel ── */}
         <div className="relative hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-[#1877F2]/20 via-slate-900/40 to-slate-900/10 border-r border-white/10 overflow-hidden">
           <div className="absolute -left-16 -top-20 h-72 w-72 rounded-full bg-[#1877F2]/25 blur-3xl" aria-hidden="true" />
@@ -99,7 +100,7 @@ export default function SignupPage() {
             <div>
               <label htmlFor="username" className="label">Username</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">👤</span>
+                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   id="username"
                   type="text"
@@ -115,7 +116,7 @@ export default function SignupPage() {
             <div>
               <label htmlFor="password" className="label">Password</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">🔒</span>
+                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -131,7 +132,7 @@ export default function SignupPage() {
             <div>
               <label htmlFor="confirmPassword" className="label">Confirm password</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">🔐</span>
+                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
@@ -155,7 +156,7 @@ export default function SignupPage() {
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-3 flex items-start gap-2.5">
-                <span className="text-red-400 text-sm mt-0.5">⚠</span>
+                <AlertIcon className="text-red-400 mt-0.5 shrink-0" />
                 <p className="text-red-300 text-sm">{error}</p>
               </div>
             )}
@@ -179,7 +180,7 @@ export default function SignupPage() {
           <p className="text-center text-slate-400 text-sm mt-6">
             Already have an account?{" "}
             <Link href="/login" className="text-[#8ab9f9] hover:text-white font-semibold transition">
-              Sign in →
+              Sign in
             </Link>
           </p>
         </div>

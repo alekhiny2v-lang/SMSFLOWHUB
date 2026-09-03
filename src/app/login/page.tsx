@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { FacebookLogo } from "@/components/FacebookLogo";
+import { AlertIcon, BoltIcon, LockIcon, ShieldCheckIcon, TagIcon, UserIcon } from "@/components/AuthIcons";
 import { apiFetch } from "@/lib/api";
 
 export default function LoginPage() {
@@ -39,7 +40,7 @@ export default function LoginPage() {
       <div className="blob w-[30rem] h-[30rem] bg-purple-600/15 -bottom-32 -right-24" style={{ animationDelay: "-7s" }} aria-hidden="true" />
       <div className="blob w-[22rem] h-[22rem] bg-emerald-500/10 top-1/3 right-1/4" style={{ animationDelay: "-13s" }} aria-hidden="true" />
 
-      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#1877F2]/10 bg-slate-900/70 backdrop-blur-xl">
+      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#1877F2]/10 bg-slate-900/85">
         {/* ── Brand panel ── */}
         <div className="relative hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-[#1877F2]/20 via-slate-900/40 to-slate-900/10 border-r border-white/10 overflow-hidden">
           <div className="absolute -left-16 -bottom-24 h-72 w-72 rounded-full bg-[#1877F2]/25 blur-3xl" aria-hidden="true" />
@@ -66,13 +67,15 @@ export default function LoginPage() {
             </h2>
             <ul className="mt-6 space-y-3">
               {[
-                { icon: "⚡", text: "Instant virtual numbers from 100+ countries" },
-                { icon: "💱", text: "Transparent PKR pricing, no hidden charges" },
-                { icon: "🛡️", text: "No code? Automatic full refund" },
-              ].map((f) => (
-                <li key={f.text} className="flex items-center gap-3 text-sm text-slate-300">
-                  <span className="grid place-items-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-xs shrink-0">{f.icon}</span>
-                  {f.text}
+                { Icon: BoltIcon, text: "Instant virtual numbers from 100+ countries" },
+                { Icon: TagIcon, text: "Transparent PKR pricing, no hidden charges" },
+                { Icon: ShieldCheckIcon, text: "No code? Automatic full refund" },
+              ].map(({ Icon, text }) => (
+                <li key={text} className="flex items-center gap-3 text-sm text-slate-300">
+                  <span className="grid place-items-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#8ab9f9] shrink-0">
+                    <Icon size={14} />
+                  </span>
+                  {text}
                 </li>
               ))}
             </ul>
@@ -98,7 +101,7 @@ export default function LoginPage() {
             <div>
               <label htmlFor="username" className="label">Username</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">👤</span>
+                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   id="username"
                   type="text"
@@ -114,7 +117,7 @@ export default function LoginPage() {
             <div>
               <label htmlFor="password" className="label">Password</label>
               <div className="relative">
-                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">🔒</span>
+                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -138,7 +141,7 @@ export default function LoginPage() {
 
             {error && (
               <div className="bg-red-500/10 border border-red-500/25 rounded-xl p-3 flex items-start gap-2.5">
-                <span className="text-red-400 text-sm mt-0.5">⚠</span>
+                <AlertIcon className="text-red-400 mt-0.5 shrink-0" />
                 <p className="text-red-300 text-sm">{error}</p>
               </div>
             )}
@@ -162,7 +165,7 @@ export default function LoginPage() {
           <p className="text-center text-slate-400 text-sm mt-6">
             Don&rsquo;t have an account?{" "}
             <Link href="/signup" className="text-[#8ab9f9] hover:text-white font-semibold transition">
-              Create one free →
+              Create one free
             </Link>
           </p>
         </div>
