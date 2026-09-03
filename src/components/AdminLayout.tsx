@@ -28,7 +28,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
       />
-      <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+      <main className="flex-1 p-4 lg:p-8 overflow-x-clip">
         <div className="max-w-7xl mx-auto animate-fade-in">{children}</div>
       </main>
     </div>

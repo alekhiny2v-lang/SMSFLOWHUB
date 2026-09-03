@@ -19,6 +19,7 @@ export async function GET() {
         service: activations.service,
         phoneNumber: activations.phoneNumber,
         cost: activations.salePrice,
+        salePrice: activations.salePrice,
         status: activations.status,
         smsCode: activations.smsCode,
         smsText: activations.smsText,
