@@ -29,6 +29,7 @@ const adminNav: NavItem[] = [
   { label: "Deposit Accounts", href: "/admin/deposit-accounts", icon: "🏦" },
   { label: "Deposits", href: "/admin/deposits", icon: "💰" },
   { label: "History", href: "/admin/history", icon: "📜" },
+  { label: "Profile", href: "/admin/profile", icon: "⚙️" },
 ];
 
 const clientNav: NavItem[] = [
