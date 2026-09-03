@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { TableCard } from "@/components/TableCard";
+import { EmptyState, PageHero, StatCard, StatCardSkeleton, StatusPill, TableSkeleton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 import { getCountryFlagByName } from "@/lib/country";
 
@@ -20,62 +21,123 @@ interface Activation {
 
 export default function AdminHistory() {
   const [activations, setActivations] = useState<Activation[]>([]);
-  const load = () => apiFetch<Activation[]>("/api/admin/activations").then(setActivations);
+  const [loaded, setLoaded] = useState(false);
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
-    load();
+    apiFetch<Activation[]>("/api/admin/activations")
+      .then(setActivations)
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, []);
+
+  const filtered = activations.filter((a) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      a.username.toLowerCase().includes(q) ||
+      a.countryName.toLowerCase().includes(q) ||
+      (a.phoneNumber || "").includes(q) ||
+      (a.smsCode || "").includes(q)
+    );
+  });
+
+  const revenue = activations.filter((a) => a.status !== "cancelled").reduce((s, a) => s + Number(a.salePrice || 0), 0);
+  const completed = activations.filter((a) => a.status === "completed").length;
 
   return (
     <AdminLayout>
-      <div className="mb-6 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Activation History</h1>
-        <p className="text-slate-400 text-sm mt-1">Complete log of all number purchases</p>
+      <PageHero
+        eyebrow="Admin"
+        title="Activation History"
+        description="Complete log of every number purchased across all clients."
+        icon={<span>📜</span>}
+      />
+
+      {/* ── Stats ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-5">
+        {!loaded ? (
+          Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
+        ) : (
+          <>
+            <StatCard label="Total activations" value={activations.length} hint="all clients, all time" icon="📱" tone="blue" />
+            <StatCard label="Codes received" value={completed} hint="completed activations" icon="✅" tone="emerald" />
+            <StatCard label="Gross revenue" value={`PKR ${revenue.toFixed(2)}`} hint="cancelled orders excluded" icon="💰" tone="white" />
+          </>
+        )}
       </div>
-      <TableCard>
-        <table className="w-full text-left text-sm min-w-[800px]">
-          <thead className="bg-slate-800/80 text-slate-300">
-            <tr>
-              <th className="px-5 py-4">ID</th>
-              <th className="px-5 py-4">User</th>
-              <th className="px-5 py-4">Country</th>
-              <th className="px-5 py-4">Phone</th>
-              <th className="px-5 py-4">Price</th>
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Code</th>
-              <th className="px-5 py-4">Date</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-300">
-            {activations.map((a) => (
-              <tr key={a.id} className="border-t border-white/5 hover:bg-white/5 transition">
-                <td className="px-5 py-4">{a.id}</td>
-                <td className="px-5 py-4 font-medium text-white">{a.username}</td>
-                <td className="px-5 py-4">
-                  <span className="flex items-center gap-2">
-                    <span className="text-xl">{getCountryFlagByName(a.countryName)}</span>
-                    <span>{a.countryName || "-"}</span>
-                  </span>
-                </td>
-                <td className="px-5 py-4">{a.phoneNumber || "-"}</td>
-                <td className="px-5 py-4">PKR {Number(a.salePrice).toFixed(2)}</td>
-                <td className="px-5 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(a.status)}`}>{a.status}</span>
-                </td>
-                <td className="px-5 py-4 font-mono">{a.smsCode || "-"}</td>
-                <td className="px-5 py-4">{new Date(a.createdAt).toLocaleString()}</td>
+
+      {/* ── Log ── */}
+      <div className="flex items-center justify-between gap-3 mt-8 mb-4 flex-wrap">
+        <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
+          <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🗂️</span>
+          Full Log
+          {loaded && (
+            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+              {filtered.length}
+            </span>
+          )}
+        </h2>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search user, country, number…"
+            className="input pl-8! w-64! py-2! text-xs"
+          />
+        </div>
+      </div>
+
+      {!loaded ? (
+        <TableSkeleton rows={8} cols={8} />
+      ) : filtered.length === 0 ? (
+        <EmptyState
+          icon="📭"
+          title={activations.length === 0 ? "No activations yet" : "Nothing matches that search"}
+          description={activations.length === 0 ? "Purchases made by clients will be logged here." : "Try a different search term."}
+        />
+      ) : (
+        <TableCard>
+          <table className="w-full text-left min-w-[900px]">
+            <thead>
+              <tr>
+                <th className="th">ID</th>
+                <th className="th">User</th>
+                <th className="th">Country</th>
+                <th className="th">Phone</th>
+                <th className="th">Price</th>
+                <th className="th">Status</th>
+                <th className="th">Code</th>
+                <th className="th">Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableCard>
+            </thead>
+            <tbody>
+              {filtered.map((a) => (
+                <tr key={a.id} className="tr-hover">
+                  <td className="td text-slate-500 tabular-nums">{a.id}</td>
+                  <td className="td font-semibold text-white">{a.username}</td>
+                  <td className="td">
+                    <span className="flex items-center gap-2.5">
+                      <span className="text-xl leading-none">{getCountryFlagByName(a.countryName)}</span>
+                      <span className="font-medium">{a.countryName || "-"}</span>
+                    </span>
+                  </td>
+                  <td className="td font-mono">{a.phoneNumber || "-"}</td>
+                  <td className="td font-semibold tabular-nums">PKR {Number(a.salePrice).toFixed(2)}</td>
+                  <td className="td">
+                    <StatusPill status={a.status} />
+                  </td>
+                  <td className="td font-mono font-bold">
+                    {a.smsCode ? <span className="text-emerald-400 tracking-wider">{a.smsCode}</span> : <span className="text-slate-600">-</span>}
+                  </td>
+                  <td className="td text-slate-400">{new Date(a.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableCard>
+      )}
     </AdminLayout>
   );
-}
-
-function getStatusColor(status: string) {
-  if (status === "completed") return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-  if (status === "pending") return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
-  if (status === "cancelled") return "bg-red-500/10 text-red-400 border border-red-500/20";
-  return "bg-slate-500/10 text-slate-400";
 }

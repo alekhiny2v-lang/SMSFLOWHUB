@@ -15,6 +15,204 @@ body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
+/* ---------- Form controls (shared across every page) ---------- */
+
+.input {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(2, 6, 23, 0.7);
+  padding: 0.625rem 0.9rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #fff;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.input::placeholder {
+  color: #475569;
+}
+
+.input:focus {
+  outline: none;
+  border-color: rgba(24, 119, 242, 0.6);
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
+  background: rgba(2, 6, 23, 0.9);
+}
+
+/* Selects keep their native arrow, so just match the input chrome. */
+select.input {
+  color: #e2e8f0;
+}
+
+select.input option {
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.label {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+/* ---------- Tables (shared) ---------- */
+
+.th {
+  padding: 0.875rem 1.25rem;
+  text-align: left;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #64748b;
+  background: rgba(15, 23, 42, 0.65);
+  white-space: nowrap;
+}
+
+.td {
+  padding: 0.9rem 1.25rem;
+  font-size: 0.875rem;
+  color: #cbd5e1;
+  vertical-align: middle;
+}
+
+.tr-hover {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background-color 0.15s ease;
+}
+
+.tr-hover:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ---------- Ambient page background ---------- */
+
+/* Soft blue aurora painted behind every panel page, echoing the hero cards. */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background: #020617;
+  pointer-events: none;
+}
+
+.page-bg::before,
+.page-bg::after {
+  content: "";
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(110px);
+  opacity: 0.5;
+}
+
+.page-bg::before {
+  width: 44rem;
+  height: 44rem;
+  top: -18rem;
+  left: 50%;
+  margin-left: -14rem;
+  background: radial-gradient(closest-side, rgba(24, 119, 242, 0.28), transparent);
+}
+
+.page-bg::after {
+  width: 36rem;
+  height: 36rem;
+  bottom: -16rem;
+  right: -12rem;
+  background: radial-gradient(closest-side, rgba(109, 40, 217, 0.16), transparent);
+}
+
+/* ---------- Auth / landing aurora blobs ---------- */
+
+@keyframes blob-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(5%, -7%) scale(1.12);
+  }
+  66% {
+    transform: translate(-5%, 5%) scale(0.94);
+  }
+}
+
+.blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(90px);
+  animation: blob-drift 20s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blob {
+    animation: none;
+  }
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #fff;
+  background-image: linear-gradient(135deg, #1877f2 0%, #2d7ff9 45%, #0b5fd1 100%);
+  box-shadow: 0 10px 24px -10px rgba(24, 119, 242, 0.6);
+  transition:
+    filter 0.2s ease,
+    transform 0.15s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1.1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
