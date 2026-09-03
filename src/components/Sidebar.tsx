@@ -175,7 +175,7 @@ export function MobileHeader({
   balance,
 }: {
   onMenuClick: () => void;
-  title: string;
+  title?: string;
   balance?: string;
 }) {
   return (
@@ -189,8 +189,12 @@ export function MobileHeader({
           ☰
         </button>
         <div className="min-w-0">
-          <h1 className="font-bold text-sm text-white leading-tight truncate">{title}</h1>
-          <p className="text-[10px] uppercase tracking-[0.16em] text-[#8ab9f9] font-bold leading-tight">SMSFlow</p>
+          <h1 className="font-bold text-sm text-white leading-tight truncate">
+            {title ?? "𝗦𝝮𝝙𝗙𝗟𝝝𝗪"}
+          </h1>
+          {title && (
+            <p className="text-[10px] uppercase tracking-[0.16em] text-[#8ab9f9] font-bold leading-tight">SMSFlow</p>
+          )}
         </div>
       </div>
       {balance !== undefined && (

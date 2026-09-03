@@ -25,7 +25,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
       <div className="page-bg" aria-hidden="true" />
-      <MobileHeader onMenuClick={() => setMenuOpen(true)} title="Client Portal" balance={user.balance} />
+      <MobileHeader onMenuClick={() => setMenuOpen(true)} balance={user.balance} />
       <Sidebar
         role="client"
         username={user.username}
