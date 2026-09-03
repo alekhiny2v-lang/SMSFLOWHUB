@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, memo } from "react";
 import Link from "next/link";
 import { ClientLayout } from "@/components/ClientLayout";
 import { FacebookChip, FacebookLogo } from "@/components/FacebookLogo";
@@ -557,7 +557,7 @@ function PinnedBuyBox({
               </button>
             </div>
 
-            <div className="max-h-[42vh] overflow-y-auto rounded-xl border border-white/5 divide-y divide-white/5 bg-slate-950/40">
+            <div className="max-h-[42vh] overflow-y-auto overscroll-contain rounded-xl border border-white/5 divide-y divide-white/5 bg-slate-950/40 list-perf-rows">
               {panelRows.length === 0 ? (
                 <p className="p-4 text-sm text-slate-500">{loading ? "Loading countries…" : `No country matches “${panelQuery}”.`}</p>
               ) : (
@@ -713,7 +713,11 @@ export default function BuyNumber() {
     refreshPrices(false);
     loadActivations();
     loadBalance();
-    const priceInterval = setInterval(() => refreshPrices(true), 30000);
+    const priceInterval = setInterval(() => {
+      // Don't refetch (or re-render) while the tab is in the background.
+      if (typeof document !== "undefined" && document.hidden) return;
+      refreshPrices(true);
+    }, 30000);
     return () => clearInterval(priceInterval);
   }, [refreshPrices, loadActivations, loadBalance]);
 
@@ -739,7 +743,10 @@ export default function BuyNumber() {
       // burn CPU and network.
       if (typeof document !== "undefined" && document.hidden) return;
       const pendingIds = activationsRef.current.filter((a) => a.status === "pending").map((a) => a.id);
-      pendingIds.forEach((id) => pollActivation(id));
+      if (pendingIds.length === 0) return;
+      // Sequential, so N pending activations never fire N simultaneous
+      // requests (which stalled the main thread on slow connections).
+      void pendingIds.reduce<Promise<void>>((chain, id) => chain.then(() => pollActivation(id)), Promise.resolve());
     }, 5000);
     return () => clearInterval(interval);
   }, [pollActivation]);
@@ -785,8 +792,13 @@ export default function BuyNumber() {
     [prices, inStockOnly, sort]
   );
 
-  const filtered = useMemo(() => rowsFor(query), [rowsFor, query]);
-  const panelRows = useMemo(() => rowsFor(panelQuery), [rowsFor, panelQuery]);
+  // Filtering + sorting 100+ countries on every keystroke was blocking the
+  // input. Deferring the query lets React keep the field responsive and drop
+  // intermediate results while the user is still typing.
+  const deferredQuery = useDeferredValue(query);
+  const deferredPanelQuery = useDeferredValue(panelQuery);
+  const filtered = useMemo(() => rowsFor(deferredQuery), [rowsFor, deferredQuery]);
+  const panelRows = useMemo(() => rowsFor(deferredPanelQuery), [rowsFor, deferredPanelQuery]);
 
   const stats = useMemo(() => {
     const inStock = prices.filter((p) => (p.count ?? 0) > 0);
@@ -1067,7 +1079,7 @@ export default function BuyNumber() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 list-perf">
               {filtered.map((p) => (
                 <CountryCard
                   key={p.id}
