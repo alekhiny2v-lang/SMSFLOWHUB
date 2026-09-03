@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { ClientLayout } from "@/components/ClientLayout";
 import { TableCard } from "@/components/TableCard";
+import { EmptyState, PageHero, StatusPill, TableSkeleton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 
 interface Transaction {
@@ -24,26 +25,57 @@ interface DepositAccount {
   instructions: string;
 }
 
+const ACCOUNT_STYLE: Record<string, { icon: string; tile: string }> = {
+  JazzCash: { icon: "📱", tile: "bg-red-500/10 border-red-500/25" },
+  EasyPaisa: { icon: "💚", tile: "bg-emerald-500/10 border-emerald-500/25" },
+  NayaPay: { icon: "💳", tile: "bg-indigo-500/10 border-indigo-500/25" },
+  SadaPay: { icon: "🧡", tile: "bg-orange-500/10 border-orange-500/25" },
+  "Bank Transfer": { icon: "🏦", tile: "bg-blue-500/10 border-blue-500/25" },
+  Cryptocurrency: { icon: "₿", tile: "bg-amber-500/10 border-amber-500/25" },
+  Other: { icon: "💰", tile: "bg-white/5 border-white/10" },
+};
+
 export default function ClientDeposits() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<DepositAccount[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [amount, setAmount] = useState("");
   const [reference, setReference] = useState("");
   const [notes, setNotes] = useState("");
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const load = () => {
-    apiFetch<Transaction[]>("/api/client/deposits").then(setTransactions);
-    apiFetch<DepositAccount[]>("/api/client/deposit-accounts").then(setAccounts);
+    Promise.all([
+      apiFetch<Transaction[]>("/api/client/deposits").catch(() => []),
+      apiFetch<DepositAccount[]>("/api/client/deposit-accounts").catch(() => []),
+    ]).then(([t, a]) => {
+      setTransactions(t);
+      setAccounts(a);
+      setLoaded(true);
+    });
   };
 
   useEffect(() => {
     load();
   }, []);
 
+  const copyAccount = async (text: string, id: number) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      /* ignore */
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
+    setSubmitting(true);
     try {
       await apiFetch("/api/client/deposits", {
         method: "POST",
@@ -52,95 +84,155 @@ export default function ClientDeposits() {
       setAmount("");
       setReference("");
       setNotes("");
-      setMessage("Deposit request submitted for approval.");
+      setMessage("Deposit request submitted — an admin will approve it shortly.");
+      setIsError(false);
       load();
     } catch (err) {
       setMessage((err as Error).message);
+      setIsError(true);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <ClientLayout>
-      <div className="mb-6 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Deposits</h1>
-        <p className="text-slate-400 text-sm mt-1">Request balance deposit to your SMSFlow wallet</p>
-      </div>
+      <PageHero
+        eyebrow="Wallet"
+        title="Add Funds"
+        description="Send money to any account below, then submit the reference for approval. Funds land in your balance as soon as an admin confirms."
+        icon={<span>💰</span>}
+      />
 
+      {/* ── Where to send ── */}
       {accounts.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
-          {accounts.map((a) => (
-            <div key={a.id} className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 card-hover">
-              <div className="flex items-center gap-2 mb-3">
-                <span className="text-2xl">{getAccountIcon(a.type)}</span>
-                <h3 className="font-bold text-white">{a.type}</h3>
-              </div>
-              <p className="text-slate-300 text-sm mb-1">{a.accountName}</p>
-              <p className="text-emerald-400 font-mono font-bold text-lg">{a.accountNumber}</p>
-              {a.instructions && <p className="text-slate-500 text-xs mt-2">{a.instructions}</p>}
-            </div>
-          ))}
+        <div className="mt-5">
+          <h2 className="text-sm font-bold text-white mb-3 flex items-center gap-2">
+            <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 text-emerald-400 live-ping" />
+            Send money to
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {accounts.map((a) => {
+              const style = ACCOUNT_STYLE[a.type] ?? ACCOUNT_STYLE.Other;
+              return (
+                <div key={a.id} className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 card-hover hover:border-[#1877F2]/40 transition-colors">
+                  <div className="flex items-center justify-between gap-3 mb-3.5">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className={`grid place-items-center w-10 h-10 rounded-xl border text-lg shrink-0 ${style.tile}`}>{style.icon}</span>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-white truncate">{a.type}</h3>
+                        <p className="text-[11px] text-slate-500 truncate">{a.accountName}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => copyAccount(a.accountNumber, a.id)}
+                      className={`shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border transition ${
+                        copiedId === a.id
+                          ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                          : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      {copiedId === a.id ? "✓ Copied" : "Copy"}
+                    </button>
+                  </div>
+                  <p className="text-emerald-400 font-mono font-bold text-lg tracking-wide text-center bg-slate-950/60 rounded-xl py-2.5 border border-white/5">
+                    {a.accountNumber}
+                  </p>
+                  {a.instructions && <p className="text-slate-500 text-xs mt-2.5 leading-relaxed">💡 {a.instructions}</p>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
-        <h3 className="font-bold text-white mb-4">Request Deposit</h3>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <input placeholder="Amount (PKR)" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <input placeholder="Transaction Reference" value={reference} onChange={(e) => setReference(e.target.value)} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input placeholder="Notes" value={notes} onChange={(e) => setNotes(e.target.value)} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <button type="submit" className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-500/20 transition">
-            Submit Request
-          </button>
-        </form>
-        {message && <p className={`mt-4 text-sm ${message.includes("submitted") ? "text-emerald-400" : "text-red-400"}`}>{message}</p>}
+      {/* ── Request form ── */}
+      <div className="mt-6 rounded-2xl border border-[#1877F2]/25 bg-slate-900/90 shadow-xl p-5 relative overflow-hidden">
+        <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#1877F2]/15 blur-3xl" aria-hidden="true" />
+        <div className="relative">
+          <h3 className="font-bold text-white mb-1 flex items-center gap-2">
+            <span className="grid place-items-center w-7 h-7 rounded-lg fb-gradient text-white text-xs font-bold">2</span>
+            Submit your deposit
+          </h3>
+          <p className="text-xs text-slate-500 mb-4 ml-9">Enter the amount you sent and the transaction reference so we can match it.</p>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div>
+              <label className="label" htmlFor="dep-amount">Amount (PKR)</label>
+              <input id="dep-amount" placeholder="e.g. 500" type="number" min="0" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} className="input" required />
+            </div>
+            <div>
+              <label className="label" htmlFor="dep-ref">Transaction reference</label>
+              <input id="dep-ref" placeholder="e.g. TID-123456" value={reference} onChange={(e) => setReference(e.target.value)} className="input" />
+            </div>
+            <div>
+              <label className="label" htmlFor="dep-notes">Notes (optional)</label>
+              <input id="dep-notes" placeholder="Anything useful" value={notes} onChange={(e) => setNotes(e.target.value)} className="input" />
+            </div>
+            <div className="flex items-end">
+              <button type="submit" disabled={submitting} className="btn-primary btn-shine w-full py-2.5!">
+                {submitting ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/70" />
+                    Submitting…
+                  </>
+                ) : (
+                  "Submit request"
+                )}
+              </button>
+            </div>
+          </form>
+          {message && (
+            <p className={`mt-4 text-sm rounded-xl px-4 py-3 border ${isError ? "text-red-300 bg-red-500/10 border-red-500/25" : "text-emerald-300 bg-emerald-500/10 border-emerald-500/25"}`}>
+              {isError ? "⚠ " : "✓ "}{message}
+            </p>
+          )}
+        </div>
       </div>
 
-      <TableCard>
-        <table className="w-full text-left text-sm min-w-[500px]">
-          <thead className="bg-slate-800/80 text-slate-300">
-            <tr>
-              <th className="px-5 py-4">Type</th>
-              <th className="px-5 py-4">Amount</th>
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Reference</th>
-              <th className="px-5 py-4">Date</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-300">
-            {transactions.map((t) => (
-              <tr key={t.id} className="border-t border-white/5 hover:bg-white/5 transition">
-                <td className="px-5 py-4">{t.type}</td>
-                <td className="px-5 py-4">PKR {Number(t.amount).toFixed(2)}</td>
-                <td className="px-5 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(t.status)}`}>{t.status}</span>
-                </td>
-                <td className="px-5 py-4">{t.reference || "-"}</td>
-                <td className="px-5 py-4">{new Date(t.createdAt).toLocaleString()}</td>
+      {/* ── History ── */}
+      <div className="flex items-center justify-between gap-3 mt-8 mb-4 flex-wrap">
+        <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
+          <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">📜</span>
+          Deposit History
+        </h2>
+      </div>
+
+      {!loaded ? (
+        <TableSkeleton rows={4} cols={5} />
+      ) : transactions.length === 0 ? (
+        <EmptyState
+          icon="🧾"
+          title="No deposit requests yet"
+          description="Your submitted deposits and their approval status will appear here."
+        />
+      ) : (
+        <TableCard>
+          <table className="w-full text-left min-w-[600px]">
+            <thead>
+              <tr>
+                <th className="th">Type</th>
+                <th className="th">Amount</th>
+                <th className="th">Status</th>
+                <th className="th">Reference</th>
+                <th className="th">Date</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableCard>
+            </thead>
+            <tbody>
+              {transactions.map((t) => (
+                <tr key={t.id} className="tr-hover">
+                  <td className="td font-semibold text-white">{t.type}</td>
+                  <td className="td font-bold text-emerald-400 tabular-nums">PKR {Number(t.amount).toFixed(2)}</td>
+                  <td className="td">
+                    <StatusPill status={t.status} />
+                  </td>
+                  <td className="td font-mono text-slate-400">{t.reference || "-"}</td>
+                  <td className="td text-slate-400">{new Date(t.createdAt).toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableCard>
+      )}
     </ClientLayout>
   );
-}
-
-function getAccountIcon(type: string) {
-  const map: Record<string, string> = {
-    JazzCash: "📱",
-    EasyPaisa: "💚",
-    NayaPay: "💳",
-    SadaPay: "🧡",
-    "Bank Transfer": "🏦",
-    Cryptocurrency: "₿",
-    Other: "💰",
-  };
-  return map[type] || "💰";
-}
-
-function getStatusColor(status: string) {
-  if (status === "completed") return "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
-  if (status === "pending") return "bg-yellow-500/10 text-yellow-400 border border-yellow-500/20";
-  if (status === "rejected") return "bg-red-500/10 text-red-400 border border-red-500/20";
-  return "bg-slate-500/10 text-slate-400";
 }

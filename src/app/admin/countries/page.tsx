@@ -3,7 +3,9 @@
 import { useEffect, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { TableCard } from "@/components/TableCard";
+import { EmptyState, PageHero, StatusPill, TableSkeleton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
+import { getCountryFlag } from "@/lib/country";
 
 interface Country {
   id: number;
@@ -49,30 +51,51 @@ interface CheapCountry {
 
 export default function AdminCountries() {
   const [countries, setCountries] = useState<Country[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [syncList, setSyncList] = useState<SmsbowerCountry[]>([]);
   const [showSync, setShowSync] = useState(false);
+  const [syncLoading, setSyncLoading] = useState(false);
   const [cheapList, setCheapList] = useState<CheapCountry[]>([]);
   const [showCheap, setShowCheap] = useState(false);
+  const [cheapLoading, setCheapLoading] = useState(false);
   const [maxPrice, setMaxPrice] = useState("0.034");
 
-  const load = () => apiFetch<Country[]>("/api/admin/countries").then(setCountries);
+  const load = () =>
+    apiFetch<Country[]>("/api/admin/countries")
+      .then(setCountries)
+      .catch(() => {})
+      .finally(() => setLoaded(true));
 
   useEffect(() => {
     load();
   }, []);
 
   const loadSync = async () => {
-    const data = await apiFetch<{ countries: SmsbowerCountry[] }>("/api/admin/smsbower/countries");
-    setSyncList(data.countries);
-    setShowSync(true);
+    setSyncLoading(true);
+    try {
+      const data = await apiFetch<{ countries: SmsbowerCountry[] }>("/api/admin/smsbower/countries");
+      setSyncList(data.countries);
+      setShowSync(true);
+    } catch {
+      /* ignore */
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   const loadCheap = async () => {
-    const data = await apiFetch<{ results: CheapCountry[] }>(`/api/admin/smsbower/cheap?maxPrice=${maxPrice}`);
-    setCheapList(data.results);
-    setShowCheap(true);
+    setCheapLoading(true);
+    try {
+      const data = await apiFetch<{ results: CheapCountry[] }>(`/api/admin/smsbower/cheap?maxPrice=${maxPrice}`);
+      setCheapList(data.results);
+      setShowCheap(true);
+    } catch {
+      /* ignore */
+    } finally {
+      setCheapLoading(false);
+    }
   };
 
   const importCountry = (c: SmsbowerCountry) => {
@@ -88,6 +111,7 @@ export default function AdminCountries() {
     });
     setEditingId(null);
     setShowSync(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,6 +149,7 @@ export default function AdminCountries() {
       active: c.active,
       sortOrder: c.sortOrder,
     });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const remove = async (id: number) => {
@@ -135,188 +160,250 @@ export default function AdminCountries() {
 
   return (
     <AdminLayout>
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 lg:mb-8">
-        <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-white">Countries</h1>
-          <p className="text-slate-400 text-sm mt-1">Manage countries, providers, and selling rates</p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+      <PageHero
+        eyebrow="Admin"
+        title="Countries"
+        description="Control which countries clients can buy, which providers serve them, and the selling price in PKR."
+        icon={<span>🌍</span>}
+      >
+        <div className="flex gap-2">
           <div className="flex gap-2">
             <input
               type="number"
               step="0.001"
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value)}
-              placeholder="Max price"
-              className="bg-slate-900/60 border border-white/10 rounded-xl px-3 py-2 text-sm text-white w-28 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              placeholder="Max $"
+              title="Maximum provider price in USD"
+              className="input w-24! py-2! text-xs"
             />
-            <button
-              onClick={loadCheap}
-              className="bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 px-4 py-2 rounded-xl font-semibold text-sm transition"
-            >
-              Cheap Providers
+            <button onClick={loadCheap} disabled={cheapLoading} className="btn-ghost py-2!">
+              {cheapLoading ? "…" : "💎 Cheap providers"}
             </button>
           </div>
-          <button
-            onClick={loadSync}
-            className="bg-slate-800 hover:bg-slate-700 text-white border border-white/10 px-4 py-2 rounded-xl font-semibold text-sm transition"
-          >
-            Sync from SMSBOWER
+          <button onClick={loadSync} disabled={syncLoading} className="btn-ghost py-2!">
+            {syncLoading ? "…" : "⟳ Sync SMSBOWER"}
           </button>
           <button
-            onClick={() => setShowSync(false)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-4 py-2 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/20 transition"
+            onClick={() => {
+              setShowSync(false);
+              setForm(emptyForm);
+              setEditingId(null);
+            }}
+            className="btn-primary btn-shine py-2!"
           >
-            + Add Country
+            + Add country
           </button>
         </div>
-      </div>
+      </PageHero>
 
+      {/* ── Cheap providers ── */}
       {showCheap && (
-        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
+        <div className="bg-slate-900/90 border border-emerald-500/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-white text-lg">Cheap Providers (price &lt; {maxPrice})</h3>
-            <button onClick={() => setShowCheap(false)} className="text-slate-400 hover:text-white text-sm">Close</button>
+            <div>
+              <h3 className="font-bold text-white text-lg">Cheap providers (under ${maxPrice})</h3>
+              <p className="text-xs text-slate-500 mt-0.5">{cheapList.length} countries with providers this cheap</p>
+            </div>
+            <button onClick={() => setShowCheap(false)} className="btn-ghost py-2!">Close</button>
           </div>
-          <div className="max-h-96 overflow-auto">
-            <TableCard>
-              <table className="w-full text-left text-sm min-w-[500px]">
-                <thead className="bg-slate-800/80 text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3">Country ID</th>
-                    <th className="px-4 py-3">Providers</th>
-                    <th className="px-4 py-3">Price</th>
-                    <th className="px-4 py-3">Count</th>
+          <div className="max-h-96 overflow-auto rounded-xl border border-white/5">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead>
+                <tr>
+                  <th className="th sticky top-0">Country</th>
+                  <th className="th sticky top-0">Providers</th>
+                  <th className="th sticky top-0">Price</th>
+                  <th className="th sticky top-0">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cheapList.map((c) => (
+                  <tr key={c.countryCode} className="tr-hover">
+                    <td className="td">
+                      <span className="flex items-center gap-2">
+                        <span className="text-lg leading-none">{getCountryFlag(c.countryCode)}</span>
+                        <span className="font-semibold text-white">{c.countryCode.toUpperCase()} · {c.smsbowerCountryId}</span>
+                      </span>
+                    </td>
+                    <td className="td text-slate-400">{c.providers.map((p) => p.providerId).join(", ")}</td>
+                    <td className="td text-emerald-400 font-semibold tabular-nums">{c.providers.map((p) => `$${p.price.toFixed(3)}`).join(", ")}</td>
+                    <td className="td tabular-nums">{c.providers.map((p) => p.count).join(", ")}</td>
                   </tr>
-                </thead>
-                <tbody className="text-slate-300">
-                  {cheapList.map((c) => (
-                    <tr key={c.countryCode} className="border-t border-white/5">
-                      <td className="px-4 py-3 font-medium">{c.smsbowerCountryId}</td>
-                      <td className="px-4 py-3">{c.providers.map((p) => p.providerId).join(", ")}</td>
-                      <td className="px-4 py-3">{c.providers.map((p) => `$${p.price.toFixed(3)}`).join(", ")}</td>
-                      <td className="px-4 py-3">{c.providers.map((p) => p.count).join(", ")}</td>
-                    </tr>
-                  ))}
-                  {cheapList.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="px-4 py-4 text-center text-slate-500">No providers found below ${maxPrice}</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </TableCard>
+                ))}
+                {cheapList.length === 0 && (
+                  <tr>
+                    <td colSpan={4} className="td text-center text-slate-500 py-6">No providers found below ${maxPrice}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
+      {/* ── Sync catalogue ── */}
       {showSync && (
-        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6 animate-fade-in">
+        <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-white text-lg">SMSBOWER Countries</h3>
-            <button onClick={() => setShowSync(false)} className="text-slate-400 hover:text-white text-sm">Close</button>
+            <div>
+              <h3 className="font-bold text-white text-lg">SMSBOWER catalogue</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Pick a country to prefill the form — {syncList.length} available</p>
+            </div>
+            <button onClick={() => setShowSync(false)} className="btn-ghost py-2!">Close</button>
           </div>
-          <div className="max-h-80 overflow-auto">
-            <TableCard>
-              <table className="w-full text-left text-sm min-w-[500px]">
-                <thead className="bg-slate-800/80 text-slate-300">
-                  <tr>
-                    <th className="px-4 py-3">Name</th>
-                    <th className="px-4 py-3">Code</th>
-                    <th className="px-4 py-3">SMSBOWER ID</th>
-                    <th className="px-4 py-3">FB Providers</th>
-                    <th className="px-4 py-3">Action</th>
+          <div className="max-h-80 overflow-auto rounded-xl border border-white/5">
+            <table className="w-full text-left text-sm min-w-[500px]">
+              <thead>
+                <tr>
+                  <th className="th sticky top-0">Name</th>
+                  <th className="th sticky top-0">Code</th>
+                  <th className="th sticky top-0">SMSBOWER ID</th>
+                  <th className="th sticky top-0">FB providers</th>
+                  <th className="th sticky top-0">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {syncList.map((c) => (
+                  <tr key={c.code} className="tr-hover">
+                    <td className="td font-semibold text-white">{c.name}</td>
+                    <td className="td uppercase text-slate-400">{c.code}</td>
+                    <td className="td tabular-nums">{c.smsbowerCountryId}</td>
+                    <td className="td tabular-nums">{c.providerCount}</td>
+                    <td className="td">
+                      <button onClick={() => importCountry(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#8ab9f9] border border-[#1877F2]/25 transition">
+                        Import →
+                      </button>
+                    </td>
                   </tr>
-                </thead>
-                <tbody className="text-slate-300">
-                  {syncList.map((c) => (
-                    <tr key={c.code} className="border-t border-white/5">
-                      <td className="px-4 py-3">{c.name}</td>
-                      <td className="px-4 py-3 uppercase">{c.code}</td>
-                      <td className="px-4 py-3">{c.smsbowerCountryId}</td>
-                      <td className="px-4 py-3">{c.providerCount}</td>
-                      <td className="px-4 py-3">
-                        <button onClick={() => importCountry(c)} className="text-blue-400 hover:text-blue-300 font-medium">Import</button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </TableCard>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
 
-      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
-        <h3 className="font-bold text-white text-lg mb-4">{editingId ? "Edit Country" : "Add Country"}</h3>
+      {/* ── Add / edit form ── */}
+      <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5">
+        <h3 className="font-bold text-white text-lg mb-4">
+          {editingId ? `Edit country #${editingId}` : "Add country"}
+        </h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-          <input placeholder="Name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <input placeholder="Code (e.g. us)" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-          <input placeholder="SMSBOWER Country ID" type="number" value={form.smsbowerCountryId} onChange={(e) => setForm({ ...form, smsbowerCountryId: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input placeholder="Provider IDs (comma separated)" value={form.providerIds} onChange={(e) => setForm({ ...form, providerIds: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input placeholder="Markup %" type="number" value={form.markupPercent} onChange={(e) => setForm({ ...form, markupPercent: e.target.value })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input placeholder="Selling Price (PKR)" type="number" value={form.sellingPkrPrice} onChange={(e) => setForm({ ...form, sellingPkrPrice: e.target.value })} className="bg-slate-950/50 border border-emerald-500/30 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500" />
-          <input placeholder="Sort Order" type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <div className="flex items-center gap-3">
-            <input id="active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-5 h-5 rounded border-white/10 bg-slate-950/50 text-blue-600" />
-            <label htmlFor="active" className="text-slate-300 text-sm">Active</label>
+          <div>
+            <label className="label">Name</label>
+            <input placeholder="e.g. Pakistan" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="input" required />
+          </div>
+          <div>
+            <label className="label">Code</label>
+            <input placeholder="e.g. pk" value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })} className="input" required />
+          </div>
+          <div>
+            <label className="label">SMSBOWER country ID</label>
+            <input placeholder="Provider country id" type="number" value={form.smsbowerCountryId} onChange={(e) => setForm({ ...form, smsbowerCountryId: e.target.value })} className="input" />
+          </div>
+          <div>
+            <label className="label">Provider IDs</label>
+            <input placeholder="Comma separated" value={form.providerIds} onChange={(e) => setForm({ ...form, providerIds: e.target.value })} className="input" />
+          </div>
+          <div>
+            <label className="label">Markup %</label>
+            <input placeholder="e.g. 25" type="number" value={form.markupPercent} onChange={(e) => setForm({ ...form, markupPercent: e.target.value })} className="input" />
+          </div>
+          <div>
+            <label className="label">Selling price (PKR)</label>
+            <input placeholder="Empty = auto" type="number" step="0.01" value={form.sellingPkrPrice} onChange={(e) => setForm({ ...form, sellingPkrPrice: e.target.value })} className="input focus:ring-emerald-500/20! focus:border-emerald-500/50!" />
+          </div>
+          <div>
+            <label className="label">Sort order</label>
+            <input placeholder="0" type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className="input" />
+          </div>
+          <div className="flex items-end">
+            <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 w-full">
+              <input id="country-active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 rounded accent-[#1877F2]" />
+              <span className="text-sm text-slate-300 font-semibold">Active for clients</span>
+            </label>
           </div>
           <div className="flex gap-2 md:col-span-2 xl:col-span-4">
-            <button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-2.5 rounded-xl font-semibold text-sm shadow-lg shadow-blue-500/20 transition">
-              {editingId ? "Update Country" : "Add Country"}
-            </button>
+            <button type="submit" className="btn-primary btn-shine">{editingId ? "Update country" : "Add country"}</button>
             {editingId && (
-              <button type="button" onClick={() => { setForm(emptyForm); setEditingId(null); }} className="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2.5 rounded-xl text-sm transition">
-                Cancel
+              <button type="button" onClick={() => { setForm(emptyForm); setEditingId(null); }} className="btn-ghost">
+                Cancel edit
               </button>
             )}
           </div>
         </form>
       </div>
 
-      <TableCard>
-        <table className="w-full text-left text-sm min-w-[900px]">
-          <thead className="bg-slate-800/80 text-slate-300">
-            <tr>
-              <th className="px-5 py-4">ID</th>
-              <th className="px-5 py-4">Name</th>
-              <th className="px-5 py-4">Code</th>
-              <th className="px-5 py-4">SMSBOWER ID</th>
-              <th className="px-5 py-4">Selling Rate</th>
-              <th className="px-5 py-4">Markup</th>
-              <th className="px-5 py-4">Status</th>
-              <th className="px-5 py-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-slate-300">
-            {countries.map((c) => (
-              <tr key={c.id} className="border-t border-white/5 hover:bg-white/5 transition">
-                <td className="px-5 py-4">{c.id}</td>
-                <td className="px-5 py-4 font-medium text-white">{c.name}</td>
-                <td className="px-5 py-4 uppercase">{c.code}</td>
-                <td className="px-5 py-4">{c.smsbowerCountryId ?? "-"}</td>
-                <td className="px-5 py-4">
-                  {c.sellingPkrPrice ? (
-                    <span className="text-emerald-400 font-bold">PKR {Number(c.sellingPkrPrice).toFixed(2)}</span>
-                  ) : (
-                    <span className="text-slate-500">Auto</span>
-                  )}
-                </td>
-                <td className="px-5 py-4">{c.markupPercent}%</td>
-                <td className="px-5 py-4">
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${c.active ? "bg-emerald-500/10 text-emerald-400" : "bg-red-500/10 text-red-400"}`}>
-                    {c.active ? "Active" : "Inactive"}
-                  </span>
-                </td>
-                <td className="px-5 py-4 space-x-3">
-                  <button onClick={() => edit(c)} className="text-blue-400 hover:text-blue-300 font-medium">Edit</button>
-                  <button onClick={() => remove(c.id)} className="text-red-400 hover:text-red-300 font-medium">Delete</button>
-                </td>
+      {/* ── Countries table ── */}
+      <div className="flex items-center justify-between gap-3 mt-8 mb-4 flex-wrap">
+        <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
+          <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🗺️</span>
+          Catalogue
+          {loaded && (
+            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+              {countries.length}
+            </span>
+          )}
+        </h2>
+        <span className="text-[11px] text-slate-500 font-semibold">{countries.filter((c) => c.active).length} active · {countries.filter((c) => !c.active).length} hidden</span>
+      </div>
+
+      {!loaded ? (
+        <TableSkeleton rows={6} cols={8} />
+      ) : countries.length === 0 ? (
+        <EmptyState icon="🌍" title="No countries yet" description="Add one manually or import from the SMSBOWER catalogue." />
+      ) : (
+        <TableCard>
+          <table className="w-full text-left min-w-[900px]">
+            <thead>
+              <tr>
+                <th className="th">Country</th>
+                <th className="th">Code</th>
+                <th className="th">SMSBOWER ID</th>
+                <th className="th">Selling rate</th>
+                <th className="th">Markup</th>
+                <th className="th">Status</th>
+                <th className="th">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </TableCard>
+            </thead>
+            <tbody>
+              {countries.map((c) => (
+                <tr key={c.id} className="tr-hover">
+                  <td className="td">
+                    <span className="flex items-center gap-2.5">
+                      <span className="text-xl leading-none">{getCountryFlag(c.code || c.name)}</span>
+                      <span className="font-semibold text-white">{c.name}</span>
+                    </span>
+                  </td>
+                  <td className="td uppercase text-slate-400">{c.code}</td>
+                  <td className="td tabular-nums text-slate-400">{c.smsbowerCountryId ?? "-"}</td>
+                  <td className="td">
+                    {c.sellingPkrPrice ? (
+                      <span className="text-emerald-400 font-bold tabular-nums">PKR {Number(c.sellingPkrPrice).toFixed(2)}</span>
+                    ) : (
+                      <span className="text-slate-500">Auto (markup)</span>
+                    )}
+                  </td>
+                  <td className="td tabular-nums">{c.markupPercent}%</td>
+                  <td className="td">
+                    <StatusPill status={c.active ? "active" : "inactive"} />
+                  </td>
+                  <td className="td">
+                    <span className="flex items-center gap-1.5">
+                      <button onClick={() => edit(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 transition">
+                        Edit
+                      </button>
+                      <button onClick={() => remove(c.id)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/25 transition">
+                        Delete
+                      </button>
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableCard>
+      )}
     </AdminLayout>
   );
 }

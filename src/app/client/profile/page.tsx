@@ -1,22 +1,35 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ClientLayout } from "@/components/ClientLayout";
+import { InfoRow, PageHero } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
 
 export default function ClientProfile() {
+  const [me, setMe] = useState<{ username: string; role: string; balance: string; createdAt?: string } | null>(null);
   const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPasswords, setShowPasswords] = useState(false);
   const [message, setMessage] = useState("");
+  const [isError, setIsError] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    apiFetch<{ username: string; role: string; balance: string; createdAt?: string }>("/api/auth/me")
+      .then(setMe)
+      .catch(() => {});
+  }, []);
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage("");
     if (password !== confirm) {
       setMessage("Passwords do not match");
+      setIsError(true);
       return;
     }
+    setSaving(true);
     try {
       await apiFetch("/api/client/profile", {
         method: "PUT",
@@ -26,43 +39,122 @@ export default function ClientProfile() {
       setPassword("");
       setConfirm("");
       setMessage("Password updated successfully");
+      setIsError(false);
     } catch (err) {
       setMessage((err as Error).message);
+      setIsError(true);
+    } finally {
+      setSaving(false);
     }
   };
 
   return (
     <ClientLayout>
-      <div className="mb-6 lg:mb-8">
-        <h1 className="text-2xl lg:text-3xl font-bold text-white">Profile</h1>
-        <p className="text-slate-400 text-sm mt-1">Manage your SMSFlow account security</p>
-      </div>
+      <PageHero
+        eyebrow="Account"
+        title="Profile & Security"
+        description="Review your account details and keep your password strong."
+        icon={<span>⚙️</span>}
+      />
 
-      {message && (
-        <div className={`rounded-xl p-4 mb-5 ${message.includes("success") ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-red-500/10 border border-red-500/20"}`}>
-          <p className={`text-sm ${message.includes("success") ? "text-emerald-300" : "text-red-300"}`}>{message}</p>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mt-6 items-start">
+        {/* ── Account card ── */}
+        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-slate-900/90 shadow-xl p-6 relative overflow-hidden">
+          <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#1877F2]/15 blur-3xl" aria-hidden="true" />
+          <div className="relative flex flex-col items-center text-center border-b border-white/5 pb-5 mb-2">
+            <span className="grid place-items-center w-16 h-16 rounded-2xl fb-gradient text-white text-xl font-bold shadow-lg shadow-[#1877F2]/30 mb-3">
+              {me ? me.username.slice(0, 2).toUpperCase() : "··"}
+            </span>
+            <p className="font-bold text-white text-lg">{me?.username ?? "…"}</p>
+            <span className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-[#1877F2]/10 text-[#8ab9f9] border-[#1877F2]/30 capitalize">
+              {(me?.role ?? "client") + " account"}
+            </span>
+          </div>
+          <div className="relative">
+            <InfoRow label="Username" value={me?.username ?? "…"} />
+            <InfoRow label="Wallet balance" value={<span className="text-emerald-400 tabular-nums">{me ? `PKR ${Number(me.balance).toFixed(2)}` : "…"}</span>} />
+            <InfoRow label="Role" value={<span className="capitalize">{me?.role ?? "…"}</span>} />
+            {me?.createdAt && <InfoRow label="Member since" value={new Date(me.createdAt).toLocaleDateString()} />}
+          </div>
         </div>
-      )}
 
-      <div className="max-w-xl">
-        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-6">
-          <h3 className="font-bold text-white text-lg mb-5">Change Password</h3>
-          <form onSubmit={handlePasswordSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Current Password</label>
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required />
+        {/* ── Password card ── */}
+        <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900/90 shadow-xl p-6">
+          <h3 className="font-bold text-white text-lg mb-1 flex items-center gap-2.5">
+            <span className="grid place-items-center w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-sm">🔐</span>
+            Change Password
+          </h3>
+          <p className="text-xs text-slate-500 mb-5">Use a long, unique password you don&rsquo;t use anywhere else.</p>
+
+          {message && (
+            <div className={`rounded-xl p-4 mb-5 border ${isError ? "bg-red-500/10 border-red-500/25" : "bg-emerald-500/10 border-emerald-500/25"}`}>
+              <p className={`text-sm font-semibold ${isError ? "text-red-300" : "text-emerald-300"}`}>
+                {isError ? "⚠ " : "✓ "}{message}
+              </p>
             </div>
+          )}
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">New Password</label>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required />
+              <label htmlFor="cur-pw" className="label">Current password</label>
+              <input
+                id="cur-pw"
+                type={showPasswords ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="input"
+                autoComplete="current-password"
+                required
+              />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">Confirm New Password</label>
-              <input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition" required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="new-pw" className="label">New password</label>
+                <input
+                  id="new-pw"
+                  type={showPasswords ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input"
+                  placeholder="At least 6 characters"
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="conf-pw" className="label">Confirm new password</label>
+                <input
+                  id="conf-pw"
+                  type={showPasswords ? "text" : "password"}
+                  value={confirm}
+                  onChange={(e) => setConfirm(e.target.value)}
+                  className="input"
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
             </div>
-            <button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-500/20 transition">
-              Update Password
-            </button>
+            <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
+              <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showPasswords}
+                  onChange={(e) => setShowPasswords(e.target.checked)}
+                  className="w-4 h-4 rounded accent-[#1877F2]"
+                />
+                Show passwords
+              </label>
+              <button type="submit" disabled={saving} className="btn-primary btn-shine">
+                {saving ? (
+                  <>
+                    <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/70" />
+                    Updating…
+                  </>
+                ) : (
+                  "Update password"
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
