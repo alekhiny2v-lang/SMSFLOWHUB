@@ -69,7 +69,7 @@ export default function ClientDeposits() {
       {accounts.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
           {accounts.map((a) => (
-            <div key={a.id} className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 card-hover">
+            <div key={a.id} className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 card-hover">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-2xl">{getAccountIcon(a.type)}</span>
                 <h3 className="font-bold text-white">{a.type}</h3>
@@ -82,7 +82,7 @@ export default function ClientDeposits() {
         </div>
       )}
 
-      <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
+      <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-5 mb-6">
         <h3 className="font-bold text-white mb-4">Request Deposit</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <input placeholder="Amount (PKR)" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} className="bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500" required />

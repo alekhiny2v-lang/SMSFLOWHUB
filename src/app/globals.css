@@ -49,9 +49,13 @@ body {
   background-clip: text;
 }
 
-/* Card hover lift */
+/* Card hover lift — transition only the properties that actually change
+   (transition: all forces style recalculation on every hover and janks on
+   low-end devices). */
 .card-hover {
-  transition: all 0.3s ease;
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
 }
 
 .card-hover:hover {

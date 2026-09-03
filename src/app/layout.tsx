@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { WhatsAppButton } from "@/components/WhatsAppButton";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,7 +11,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-slate-950 text-slate-100 antialiased min-h-screen">{children}</body>
+      <body className="bg-slate-950 text-slate-100 antialiased min-h-screen">
+        {children}
+        <WhatsAppButton />
+      </body>
     </html>
   );
 }

@@ -45,7 +45,7 @@ export default function ClientProfile() {
       )}
 
       <div className="max-w-xl">
-        <div className="bg-slate-900/60 backdrop-blur-sm border border-white/10 rounded-2xl shadow-xl p-6">
+        <div className="bg-slate-900 border border-white/10 rounded-2xl shadow-xl p-6">
           <h3 className="font-bold text-white text-lg mb-5">Change Password</h3>
           <form onSubmit={handlePasswordSubmit} className="space-y-5">
             <div>
