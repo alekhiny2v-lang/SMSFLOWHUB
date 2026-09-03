@@ -119,3 +119,92 @@ body {
 .animate-pulse-glow {
   animation: pulse-glow 2s infinite;
 }
+
+/* ---------- Facebook service accents ---------- */
+
+/* Blue brand halo used behind the pinned buy box and the hero badge. */
+.fb-glow {
+  box-shadow:
+    0 0 0 1px rgba(24, 119, 242, 0.35),
+    0 14px 34px -16px rgba(24, 119, 242, 0.55);
+}
+
+.fb-gradient {
+  background-image: linear-gradient(135deg, #1877f2 0%, #2d7ff9 45%, #0b5fd1 100%);
+}
+
+/* The "f" tile gets a soft bloom so the logo reads as branding, not decoration. */
+.fb-badge-bloom {
+  filter: drop-shadow(0 4px 10px rgba(24, 119, 242, 0.45));
+}
+
+/* ---------- Live / status indicators ---------- */
+
+@keyframes live-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.65;
+  }
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+.live-ping {
+  position: relative;
+}
+
+.live-ping::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: live-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ---------- Skeleton loaders ---------- */
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(148, 163, 184, 0.1);
+}
+
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+/* Hide scrollbars on horizontal chip rows (still scrollable by touch/trackpad). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover:hover {
+    transform: none;
+  }
+
+  .live-ping::after,
+  .skeleton::after {
+    animation: none;
+  }
+}
+

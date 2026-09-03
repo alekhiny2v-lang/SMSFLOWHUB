@@ -29,7 +29,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
       />
-      <main className="flex-1 p-4 lg:p-8 overflow-x-hidden">
+      {/* overflow-x-clip (not -hidden) keeps the document as the scroll
+          container, so `position: sticky` panels inside the page — e.g. the
+          pinned Buy box on /client/buy — actually stick. An overflow value of
+          `hidden` would turn <main> into its own scrollport and silently break
+          every sticky child. */}
+      <main className="flex-1 p-4 lg:p-8 overflow-x-clip">
         <div className="max-w-7xl mx-auto animate-fade-in">{children}</div>
       </main>
     </div>

@@ -3,11 +3,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { FacebookLogo } from "./FacebookLogo";
 
 interface NavItem {
   label: string;
   href: string;
   icon: string;
+  /** Renders an official brand mark instead of the emoji icon. */
+  brand?: "facebook";
 }
 
 interface SidebarProps {
@@ -30,7 +33,7 @@ const adminNav: NavItem[] = [
 
 const clientNav: NavItem[] = [
   { label: "Dashboard", href: "/client/dashboard", icon: "📊" },
-  { label: "Buy Number", href: "/client/buy", icon: "🛒" },
+  { label: "Buy FB Number", href: "/client/buy", icon: "🛒", brand: "facebook" },
   { label: "History", href: "/client/history", icon: "📜" },
   { label: "Deposits", href: "/client/deposits", icon: "💰" },
   { label: "Profile", href: "/client/profile", icon: "⚙️" },
@@ -87,7 +90,11 @@ export function Sidebar({ role, username, balance, onLogout, open, onClose }: Si
                     : "text-slate-300 hover:bg-white/5 hover:text-white"
                 }`}
               >
-                <span className="text-lg">{item.icon}</span>
+                {item.brand === "facebook" ? (
+                  <FacebookLogo size={20} accessible={false} className="shrink-0" />
+                ) : (
+                  <span className="text-lg">{item.icon}</span>
+                )}
                 <span className="font-medium">{item.label}</span>
                 {active && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white" />}
               </Link>
@@ -125,7 +132,7 @@ export function MobileHeader({
   balance?: string;
 }) {
   return (
-    <header className="lg:hidden bg-slate-900 border-b border-white/10 p-4 flex items-center justify-between sticky top-0 z-30">
+    <header className="lg:hidden h-16 shrink-0 px-4 bg-slate-900/95 backdrop-blur border-b border-white/10 flex items-center justify-between sticky top-0 z-40">
       <button onClick={onMenuClick} className="text-2xl text-white p-1" aria-label="Open menu">
         ☰
       </button>
