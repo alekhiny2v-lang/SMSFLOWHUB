@@ -27,9 +27,9 @@ body {
   line-height: 1.4;
   color: #fff;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+    border-color 0.12s ease,
+    box-shadow 0.12s ease,
+    background-color 0.12s ease;
 }
 
 .input::placeholder {
@@ -86,7 +86,7 @@ select.input option {
 
 .tr-hover {
   border-top: 1px solid rgba(255, 255, 255, 0.05);
-  transition: background-color 0.15s ease;
+  transition: background-color 0.1s ease;
 }
 
 .tr-hover:hover {
@@ -159,14 +159,11 @@ select.input option {
   mask-image: radial-gradient(closest-side, #000 20%, transparent 100%);
   -webkit-mask-image: radial-gradient(closest-side, #000 20%, transparent 100%);
   opacity: 0.9;
-  will-change: transform;
-  transform: translateZ(0);
-  contain: strict;
 }
 
 @media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
   .blob {
-    animation: blob-drift 24s ease-in-out infinite;
+    animation: blob-drift 14s ease-in-out infinite;
   }
 }
 
@@ -185,8 +182,8 @@ select.input option {
   background-image: linear-gradient(135deg, #1877f2 0%, #2d7ff9 45%, #0b5fd1 100%);
   box-shadow: 0 10px 24px -10px rgba(24, 119, 242, 0.6);
   transition:
-    filter 0.2s ease,
-    transform 0.15s ease;
+    filter 0.12s ease,
+    transform 0.1s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
@@ -215,8 +212,8 @@ select.input option {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+    background-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .btn-ghost:hover {
@@ -263,8 +260,8 @@ select.input option {
    low-end devices). */
 .card-hover {
   transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .card-hover:hover {
@@ -292,7 +289,7 @@ select.input option {
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(30deg);
-  transition: all 0.6s;
+  transition: left 0.35s ease;
 }
 
 .btn-shine:hover::after {
@@ -303,7 +300,7 @@ select.input option {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -312,7 +309,7 @@ select.input option {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out;
+  animation: fadeIn 0.18s ease-out;
 }
 
 @keyframes pulse-glow {
@@ -326,7 +323,7 @@ select.input option {
 }
 
 .animate-pulse-glow {
-  animation: pulse-glow 2s infinite;
+  animation: pulse-glow 1.4s infinite;
 }
 
 /* ---------- Facebook service accents ---------- */
@@ -371,7 +368,7 @@ select.input option {
   inset: 0;
   border-radius: 9999px;
   background: currentColor;
-  animation: live-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  animation: live-ping 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
 /* ---------- Skeleton loaders ---------- */
@@ -394,7 +391,7 @@ select.input option {
   inset: 0;
   transform: translateX(-100%);
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
-  animation: shimmer 1.6s infinite;
+  animation: shimmer 1s infinite;
 }
 
 /* Hide scrollbars on horizontal chip rows (still scrollable by touch/trackpad). */
@@ -441,17 +438,13 @@ select.input option {
   }
 }
 
-/* Long lists of activation / country cards: let the browser skip layout and
-   paint for the ones scrolled out of view. */
-.list-perf > * {
-  content-visibility: auto;
-  contain-intrinsic-size: 220px;
-}
-
-/* Same trick for compact rows (the country picker list). */
+/* Long lists were previously virtualised with `content-visibility: auto`.
+   On mobile Chrome/WebKit that repeatedly skips painting whole sections while
+   scrolling, which is exactly the "screen goes blank on scroll" report — so it
+   is intentionally NOT used any more. Cheap containment only. */
+.list-perf > *,
 .list-perf-rows > * {
-  content-visibility: auto;
-  contain-intrinsic-size: 52px;
+  contain: layout style;
 }
 
 /* Hover lift only where a real pointer exists — on touch it just triggers
@@ -461,4 +454,45 @@ select.input option {
     transform: none;
     box-shadow: none;
   }
+}
+
+/* ---------- Global motion speed ---------- */
+
+/* Spinners / pulses run noticeably quicker than Tailwind's defaults. */
+.animate-spin {
+  animation-duration: 0.7s;
+}
+
+.animate-pulse {
+  animation-duration: 1.2s;
+}
+
+/* Utility: default Tailwind `transition` (150ms) is fine, but anything using
+   the slower named durations in this app is tightened here. */
+.duration-300 {
+  transition-duration: 180ms;
+}
+
+.duration-1000 {
+  transition-duration: 1000ms;
+}
+
+/* ---------- Scroll paint stability ---------- */
+
+/* Big translucent/fixed layers were repainting the whole viewport on every
+   scroll frame (white/blank flashes on mobile). Promote only the fixed
+   background once, and let the browser scroll the rest normally. */
+.page-bg {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+html {
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  overflow-anchor: none;
+}
+
+body {
+  overflow-x: hidden;
 }

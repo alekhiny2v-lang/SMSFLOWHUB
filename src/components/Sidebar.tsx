@@ -99,7 +99,7 @@ export function Sidebar({ role, username, balance, onLogout, open, onClose }: Si
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-sm group ${
+                className={`relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-sm group ${
                   active
                     ? "bg-gradient-to-r from-[#1877F2]/25 to-[#1877F2]/5 text-white shadow-lg shadow-[#1877F2]/15"
                     : "text-slate-400 hover:bg-white/5 hover:text-white"
