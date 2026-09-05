@@ -6,6 +6,7 @@ import { ClientLayout } from "@/components/ClientLayout";
 import { TableCard } from "@/components/TableCard";
 import { EmptyState, PageHero, StatCard, StatCardSkeleton, StatusPill, TableSkeleton } from "@/components/ui";
 import { FacebookLogo } from "@/components/FacebookLogo";
+import { SMSFlowLogo } from "@/components/SMSFlowLogo";
 import { apiFetch } from "@/lib/api";
 import { getCountryFlagByName } from "@/lib/country";
 
@@ -42,7 +43,7 @@ export default function ClientDashboard() {
         eyebrow="Client Portal"
         title={me ? `Welcome back, ${me.username}` : "Dashboard"}
         description="Your wallet, numbers and OTP activity at a glance."
-        icon={<FacebookLogo size={26} accessible={false} className="rounded-lg" />}
+        icon={<SMSFlowLogo size={48} className="rounded-2xl" />}
       >
         <Link href="/client/buy" className="btn-primary btn-shine">
           <FacebookLogo size={14} variant="glyph" accessible={false} />
@@ -82,7 +83,7 @@ export default function ClientDashboard() {
         <TableSkeleton rows={5} cols={4} />
       ) : activations.length === 0 ? (
         <EmptyState
-          icon={<FacebookLogo size={26} accessible={false} className="rounded-lg brand-badge-bloom" />}
+          icon={<span className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shadow-lg shadow-brand/25 brand-badge-bloom"><SMSFlowLogo size={40} /></span>}
           title="No numbers yet"
           description="Buy your first Facebook number and the OTP will show up here in real time."
           action={

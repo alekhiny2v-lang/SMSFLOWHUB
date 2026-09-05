@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
 import { FacebookChip, FacebookLogo } from "@/components/FacebookLogo";
+import { SMSFlowLogo } from "@/components/SMSFlowLogo";
 
 /**
  * Public landing page for signed-out visitors. Signed-in users go straight
@@ -212,8 +213,8 @@ export default async function HomePage() {
             <div className="absolute -right-16 -top-24 h-72 w-72 rounded-full bg-brand/25 blur-3xl" aria-hidden="true" />
             <div className="absolute -left-16 -bottom-24 h-72 w-72 rounded-full bg-brand-deep/12 blur-3xl" aria-hidden="true" />
             <div className="relative">
-              <div className="inline-flex items-center justify-center mb-5 brand-badge-bloom">
-                <FacebookLogo size={48} accessible={false} className="rounded-2xl" />
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-brand/25 mb-5 brand-badge-bloom">
+                <SMSFlowLogo size={80} priority />
               </div>
               <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight">Ready to verify your first number?</h2>
               <p className="text-fg-soft text-sm sm:text-base mt-3 max-w-xl mx-auto">

@@ -188,6 +188,9 @@ export function MobileHeader({
         >
           ☰
         </button>
+        <div className="w-9 h-9 rounded-xl overflow-hidden border border-white/10 shadow-lg shadow-brand/25 shrink-0">
+          <Image src="/logo.png" alt="SMSFlow" width={36} height={36} className="w-full h-full object-cover" />
+        </div>
         <div className="min-w-0">
           <h1 className="font-bold text-sm text-white leading-tight truncate">
             {title ?? "𝗦𝝮𝝙𝗙𝗟𝝝𝗪"}

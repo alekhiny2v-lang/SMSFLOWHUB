@@ -13,6 +13,7 @@ import {
   type StatTone,
 } from "@/components/ui";
 import { FacebookChip, FacebookLogo } from "@/components/FacebookLogo";
+import { SMSFlowLogo } from "@/components/SMSFlowLogo";
 
 /**
  * Offline style guide: renders the shared primitives with mock data so the
@@ -64,7 +65,7 @@ export default function ThemePreviewPage() {
             eyebrow="Style guide"
             title="Dark mode palette"
             description="Pitch-black canvas, charcoal cards, white type and a vivid amber accent for calls to action, active states and badges."
-            icon={<FacebookLogo size={26} accessible={false} className="rounded-lg" />}
+            icon={<SMSFlowLogo size={48} className="rounded-2xl" />}
           >
             <button className="btn-primary btn-shine">
               <FacebookLogo size={14} variant="glyph" accessible={false} />
@@ -304,7 +305,7 @@ export default function ThemePreviewPage() {
           </div>
 
           <EmptyState
-            icon={<FacebookLogo size={26} accessible={false} className="rounded-lg brand-badge-bloom" />}
+            icon={<span className="w-10 h-10 rounded-xl overflow-hidden border border-white/10 shadow-lg shadow-brand/25 brand-badge-bloom"><SMSFlowLogo size={40} /></span>}
             title="Empty state"
             description="Dashed, charcoal and centred — with an amber call to action."
             action={<button className="btn-primary btn-shine">Buy your first number</button>}
