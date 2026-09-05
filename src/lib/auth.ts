@@ -123,9 +123,28 @@ export async function getCurrentUser(): Promise<SessionUser | null> {
   const sessionUser = await getSessionUser();
   if (!sessionUser) return null;
   try {
-    return await refreshSessionUser(sessionUser.id);
+    const rows = await db
+      .select({
+        id: users.id,
+        username: users.username,
+        role: users.role,
+        balance: users.balance,
+      })
+      .from(users)
+      .where(eq(users.id, sessionUser.id));
+    if (!rows[0]) return null;
+    return rows[0] as SessionUser;
   } catch {
-    await destroySession();
+    // Read-only by design: this runs inside Server Component renders (e.g. the
+    // home page). Next.js forbids mutating cookies anywhere but a Server Action
+    // or Route Handler, so calling destroySession()/createSession() here throws
+    // "Cookies can only be modified in a Server Action or Route Handler" — which
+    // previously surfaced as the generic "Something went wrong" page whenever a
+    // signed-in visitor hit the site while the database was unreachable.
+    // Instead we degrade to "signed-out" and let the cookie be cleared where it
+    // is actually allowed (logout, re-auth). Session cookies are still refreshed
+    // via refreshSessionUser() inside Route Handlers (/api/auth/me, /admin/profile,
+    // /client/buy).
     return null;
   }
 }
