@@ -13,27 +13,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Username and password required" }, { status: 400 });
     }
 
+    const cleanUsername = normalizeUsername(username);
+
+    const loadUser = () =>
+      db
+        .select({
+          id: users.id,
+          username: users.username,
+          role: users.role,
+          balance: users.balance,
+          password: users.password,
+          status: users.status,
+        })
+        .from(users)
+        .where(eq(users.username, cleanUsername));
+
+    let rows = await loadUser();
+
     // Lazily bootstrap the admin account so the default admin credentials work
     // out of the box, even if `/api/setup` or the seed script was never run.
-    if (normalizeUsername(username) === ADMIN_USERNAME) {
+    // This runs only when the lookup came back empty (one round trip) — doing it
+    // up front cost a second connection attempt on every login, which pushed the
+    // request past the 10s serverless execution limit whenever the database was
+    // slow or unreachable.
+    if (rows.length === 0 && cleanUsername === ADMIN_USERNAME) {
       try {
         await ensureAdmin();
+        rows = await loadUser();
       } catch (bootstrapErr) {
         console.error("[v0] Admin bootstrap during login failed:", (bootstrapErr as Error).message);
       }
     }
-
-    const rows = await db
-      .select({
-        id: users.id,
-        username: users.username,
-        role: users.role,
-        balance: users.balance,
-        password: users.password,
-        status: users.status,
-      })
-      .from(users)
-      .where(eq(users.username, normalizeUsername(username)));
 
     const user = rows[0];
     if (!user || user.status !== "active") {

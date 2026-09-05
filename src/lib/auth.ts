@@ -5,13 +5,30 @@ import { eq } from "@/db/query";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 
-const jwtSecret = process.env.JWT_SECRET;
-if (!jwtSecret && process.env.NODE_ENV === "production") {
-  throw new Error("JWT_SECRET is required in production");
-}
-
-const secret = new TextEncoder().encode(jwtSecret || "dev-only-secret");
 const COOKIE_NAME = "panel_session";
+const DEV_FALLBACK_SECRET = "dev-only-secret";
+
+/**
+ * Resolve the signing secret lazily, at the moment a token is signed or
+ * verified, instead of while the module is being imported.
+ *
+ * Reading `process.env.JWT_SECRET` at module scope meant the whole app threw
+ * during `next build` (and on every cold start) whenever the variable was
+ * missing from the deployment environment — the build aborted with
+ * "JWT_SECRET is required in production" and every route served a 500. Deferring
+ * the check keeps the build green and turns a missing secret into an explicit,
+ * actionable error on the one request that actually needs it.
+ */
+function getSecret(): Uint8Array {
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("JWT_SECRET is not configured. Add it to your deployment environment variables and redeploy.");
+    }
+    return new TextEncoder().encode(DEV_FALLBACK_SECRET);
+  }
+  return new TextEncoder().encode(jwtSecret);
+}
 
 export interface SessionUser {
   id: number;
@@ -41,7 +58,7 @@ export async function createSession(user: SessionUser): Promise<void> {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secret);
+    .sign(getSecret());
 
   const cookieStore = await cookies();
   cookieStore.set(COOKIE_NAME, token, {
@@ -63,7 +80,7 @@ export async function getSessionUser(): Promise<SessionUser | null> {
   const token = cookieStore.get(COOKIE_NAME)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getSecret());
     return payload as unknown as SessionUser;
   } catch {
     return null;
