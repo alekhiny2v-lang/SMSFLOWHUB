@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body className="bg-canvas text-fg antialiased min-h-screen">
+      <body className="bg-canvas text-fg antialiased min-h-screen page-enter">
         {children}
         <WhatsAppButton />
       </body>
