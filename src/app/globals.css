@@ -1,18 +1,58 @@
 @import "tailwindcss";
 
+/* ══════════════════════════════════════════════════════════════════
+   SMSFlow design tokens (dark mode)
+
+   Surfaces   canvas #0A0A0A (page)  ·  surface #1A1A1E (cards)
+              elevated #23232A (nested chips, table heads, hovers)
+   Text       fg #FFFFFF (primary)  ·  fg-soft (body copy)
+              muted #9CA3AF (secondary labels + placeholders)
+   Brand      brand #FF9900  ·  brand-deep #F59E0B  ·  brand-soft #FFC46B
+              Call-to-action buttons, active highlights and badges.
+   Semantic   emerald (success / money) · red (danger) · info (pending)
+
+   Amber CTAs use near-black text: white on #FF9900 is only ~2:1, while
+   #0A0A0A on #FF9900 is ~8.6:1, so the label stays readable.
+   ══════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* Surfaces */
+  --color-canvas: #0a0a0a;
+  --color-surface: #1a1a1e;
+  --color-elevated: #23232a;
+
+  /* Text */
+  --color-fg: #ffffff;
+  --color-fg-soft: #e7e7ec;
+  --color-muted: #9ca3af;
+  /* Ink used for text sitting *on* an amber brand fill (white on #FF9900 is
+     unreadable at ~2:1, near-black is ~8.6:1). */
+  --color-ink: #0a0a0a;
+
+  /* Brand */
+  --color-brand: #ff9900;
+  --color-brand-deep: #f59e0b;
+  --color-brand-soft: #ffc46b;
+
+  /* Semantic accents */
+  --color-info: #60a5fa;
+}
+
 :root {
-  --primary: #3b82f6;
-  --primary-light: #60a5fa;
-  --accent: #8b5cf6;
+  --primary: #ff9900;
+  --primary-light: #ffc46b;
+  --accent: #f59e0b;
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --dark: #0f172a;
-  --dark-card: #1e293b;
+  --dark: #0a0a0a;
+  --dark-card: #1a1a1e;
 }
 
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--color-canvas);
+  color: var(--color-fg);
 }
 
 /* ---------- Form controls (shared across every page) ---------- */
@@ -21,11 +61,11 @@ body {
   width: 100%;
   border-radius: 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(2, 6, 23, 0.7);
+  background: #121215;
   padding: 0.625rem 0.9rem;
   font-size: 0.875rem;
   line-height: 1.4;
-  color: #fff;
+  color: var(--color-fg);
   transition:
     border-color 0.12s ease,
     box-shadow 0.12s ease,
@@ -33,24 +73,24 @@ body {
 }
 
 .input::placeholder {
-  color: #475569;
+  color: var(--color-muted);
 }
 
 .input:focus {
   outline: none;
-  border-color: rgba(24, 119, 242, 0.6);
-  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2);
-  background: rgba(2, 6, 23, 0.9);
+  border-color: rgba(255, 153, 0, 0.6);
+  box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.18);
+  background: #0d0d10;
 }
 
 /* Selects keep their native arrow, so just match the input chrome. */
 select.input {
-  color: #e2e8f0;
+  color: var(--color-fg-soft);
 }
 
 select.input option {
-  background: #0f172a;
-  color: #e2e8f0;
+  background: var(--color-surface);
+  color: var(--color-fg);
 }
 
 .label {
@@ -59,7 +99,7 @@ select.input option {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #64748b;
+  color: var(--color-muted);
   margin-bottom: 0.5rem;
 }
 
@@ -72,36 +112,36 @@ select.input option {
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #64748b;
-  background: rgba(15, 23, 42, 0.65);
+  color: var(--color-muted);
+  background: rgba(255, 255, 255, 0.03);
   white-space: nowrap;
 }
 
 .td {
   padding: 0.9rem 1.25rem;
   font-size: 0.875rem;
-  color: #cbd5e1;
+  color: var(--color-fg-soft);
   vertical-align: middle;
 }
 
 .tr-hover {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
   transition: background-color 0.1s ease;
 }
 
 .tr-hover:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ---------- Ambient page background ---------- */
 
-/* Soft blue aurora painted behind every panel page, echoing the hero cards. */
+/* Soft amber aurora painted behind every panel page, echoing the hero cards. */
 .page-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
-  background: #020617;
+  background: var(--color-canvas);
   pointer-events: none;
 }
 
@@ -122,7 +162,7 @@ select.input option {
   top: -18rem;
   left: 50%;
   margin-left: -14rem;
-  background: radial-gradient(closest-side, rgba(24, 119, 242, 0.28), transparent);
+  background: radial-gradient(closest-side, rgba(255, 153, 0, 0.16), transparent);
 }
 
 .page-bg::after {
@@ -130,7 +170,7 @@ select.input option {
   height: 36rem;
   bottom: -16rem;
   right: -12rem;
-  background: radial-gradient(closest-side, rgba(109, 40, 217, 0.16), transparent);
+  background: radial-gradient(closest-side, rgba(245, 158, 11, 0.1), transparent);
 }
 
 /* ---------- Auth / landing aurora blobs ---------- */
@@ -178,16 +218,16 @@ select.input option {
   padding: 0.625rem 1.1rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #fff;
-  background-image: linear-gradient(135deg, #1877f2 0%, #2d7ff9 45%, #0b5fd1 100%);
-  box-shadow: 0 10px 24px -10px rgba(24, 119, 242, 0.6);
+  color: #0a0a0a;
+  background-image: linear-gradient(135deg, #ffb020 0%, #ff9900 45%, #f59e0b 100%);
+  box-shadow: 0 10px 24px -10px rgba(255, 153, 0, 0.55);
   transition:
     filter 0.12s ease,
     transform 0.1s ease;
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.12);
+  filter: brightness(1.08);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -199,6 +239,14 @@ select.input option {
   cursor: not-allowed;
 }
 
+/* Spinners and leading glyphs inside an amber button need dark ink to stay
+   visible against the fill. */
+.btn-primary .animate-spin,
+.brand-gradient .animate-spin {
+  border-color: rgba(10, 10, 10, 0.35);
+  border-bottom-color: #0a0a0a;
+}
+
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -208,17 +256,19 @@ select.input option {
   padding: 0.625rem 1.1rem;
   font-size: 0.8125rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: var(--color-muted);
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   transition:
     background-color 0.12s ease,
-    color 0.12s ease;
+    color 0.12s ease,
+    border-color 0.12s ease;
 }
 
 .btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: rgba(255, 153, 0, 0.12);
+  border-color: rgba(255, 153, 0, 0.35);
+  color: var(--color-brand);
 }
 
 /* Custom scrollbar */
@@ -232,12 +282,12 @@ select.input option {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 153, 0, 0.55);
 }
 
 /* Glass effect */
@@ -249,7 +299,7 @@ select.input option {
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  background: linear-gradient(135deg, #ffc46b 0%, #ff9900 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -261,12 +311,13 @@ select.input option {
 .card-hover {
   transition:
     transform 0.15s ease,
-    box-shadow 0.15s ease;
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 
 .card-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.6);
 }
 
 /* Button shine */
@@ -285,7 +336,7 @@ select.input option {
   background: linear-gradient(
     to right,
     rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.18) 50%,
     rgba(255, 255, 255, 0) 100%
   );
   transform: rotate(30deg);
@@ -315,10 +366,10 @@ select.input option {
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(255, 153, 0, 0.25);
   }
   50% {
-    box-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+    box-shadow: 0 0 40px rgba(255, 153, 0, 0.45);
   }
 }
 
@@ -326,22 +377,23 @@ select.input option {
   animation: pulse-glow 1.4s infinite;
 }
 
-/* ---------- Facebook service accents ---------- */
+/* ---------- Brand accents (amber) ---------- */
 
-/* Blue brand halo used behind the pinned buy box and the hero badge. */
-.fb-glow {
+/* Halo used behind the pinned buy box, hero badges and stat tiles. */
+.brand-glow {
   box-shadow:
-    0 0 0 1px rgba(24, 119, 242, 0.35),
-    0 14px 34px -16px rgba(24, 119, 242, 0.55);
+    0 0 0 1px rgba(255, 153, 0, 0.35),
+    0 14px 34px -16px rgba(255, 153, 0, 0.5);
 }
 
-.fb-gradient {
-  background-image: linear-gradient(135deg, #1877f2 0%, #2d7ff9 45%, #0b5fd1 100%);
+.brand-gradient {
+  background-image: linear-gradient(135deg, #ffb020 0%, #ff9900 45%, #f59e0b 100%);
+  color: #0a0a0a;
 }
 
 /* The "f" tile gets a soft bloom so the logo reads as branding, not decoration. */
-.fb-badge-bloom {
-  filter: drop-shadow(0 4px 10px rgba(24, 119, 242, 0.45));
+.brand-badge-bloom {
+  filter: drop-shadow(0 4px 10px rgba(255, 153, 0, 0.35));
 }
 
 /* ---------- Live / status indicators ---------- */
@@ -382,7 +434,7 @@ select.input option {
 .skeleton {
   position: relative;
   overflow: hidden;
-  background: rgba(148, 163, 184, 0.1);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .skeleton::after {
@@ -390,7 +442,7 @@ select.input option {
   position: absolute;
   inset: 0;
   transform: translateX(-100%);
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.07), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.06), transparent);
   animation: shimmer 1s infinite;
 }
 
@@ -491,6 +543,7 @@ html {
   scroll-behavior: auto;
   -webkit-overflow-scrolling: touch;
   overflow-anchor: none;
+  color-scheme: dark;
 }
 
 body {

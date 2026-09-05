@@ -22,21 +22,21 @@ export function PageHero({
   icon?: ReactNode;
 }) {
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#1877F2]/25 bg-gradient-to-br from-[#1877F2]/15 via-slate-900/60 to-slate-900/30 p-5 lg:p-6">
-      <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#1877F2]/20 blur-3xl" aria-hidden="true" />
+    <section className="relative overflow-hidden rounded-2xl border border-brand/25 bg-gradient-to-br from-brand/15 via-surface/60 to-surface/30 p-5 lg:p-6">
+      <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-brand/20 blur-3xl" aria-hidden="true" />
       <div className="relative flex flex-col lg:flex-row lg:items-center gap-4">
         <div className="flex items-center gap-4 flex-1 min-w-0">
           {icon && (
-            <div className="shrink-0 grid place-items-center w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-xl fb-glow">
+            <div className="shrink-0 grid place-items-center w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-xl brand-glow">
               {icon}
             </div>
           )}
           <div className="min-w-0">
             {eyebrow && (
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8ab9f9]">{eyebrow}</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-soft">{eyebrow}</p>
             )}
             <h1 className="text-2xl lg:text-3xl font-bold text-white leading-tight">{title}</h1>
-            {description && <p className="text-slate-400 text-sm mt-1 max-w-2xl">{description}</p>}
+            {description && <p className="text-muted text-sm mt-1 max-w-2xl">{description}</p>}
           </div>
         </div>
         {children && <div className="flex items-center gap-2 shrink-0 flex-wrap">{children}</div>}
@@ -47,11 +47,15 @@ export function PageHero({
 
 /* ── Stat tile ────────────────────────────────────────────────────── */
 
+/**
+ * Stat tones. `brand` is the amber accent used for highlights; `info` (blue)
+ * carries "pending / waiting" states so they never read as a call to action.
+ */
 const TONES = {
   white: "text-white",
-  blue: "text-[#8ab9f9]",
+  brand: "text-brand",
   emerald: "text-emerald-400",
-  amber: "text-amber-400",
+  info: "text-info",
   red: "text-red-400",
 } as const;
 
@@ -59,9 +63,9 @@ export type StatTone = keyof typeof TONES;
 
 const ICON_TILES: Record<StatTone, string> = {
   white: "bg-white/5 border-white/10",
-  blue: "bg-[#1877F2]/15 border-[#1877F2]/30",
+  brand: "bg-brand/15 border-brand/30",
   emerald: "bg-emerald-500/10 border-emerald-500/25",
-  amber: "bg-amber-500/10 border-amber-500/25",
+  info: "bg-info/10 border-info/25",
   red: "bg-red-500/10 border-red-500/25",
 };
 
@@ -79,12 +83,12 @@ export function StatCard({
   tone?: StatTone;
 }) {
   return (
-    <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 card-hover relative overflow-hidden">
+    <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 card-hover relative overflow-hidden">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{label}</p>
+          <p className="text-[10px] uppercase tracking-widest text-muted font-bold">{label}</p>
           <p className={`text-2xl lg:text-[28px] font-bold tabular-nums mt-1.5 leading-tight ${TONES[tone]}`}>{value}</p>
-          {hint && <p className="text-[11px] text-slate-500 mt-1 truncate">{hint}</p>}
+          {hint && <p className="text-[11px] text-muted mt-1 truncate">{hint}</p>}
         </div>
         {icon && (
           <span className={`grid place-items-center w-10 h-10 rounded-xl border shrink-0 text-base ${ICON_TILES[tone]}`}>{icon}</span>
@@ -98,7 +102,7 @@ export function StatCard({
 
 const STATUS_META: Record<string, { label: string; className: string }> = {
   completed: { label: "Completed", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25" },
-  pending: { label: "Pending", className: "bg-amber-500/10 text-amber-300 border-amber-500/25" },
+  pending: { label: "Pending", className: "bg-info/10 text-info border-info/25" },
   cancelled: { label: "Cancelled", className: "bg-red-500/10 text-red-400 border-red-500/25" },
   rejected: { label: "Rejected", className: "bg-red-500/10 text-red-400 border-red-500/25" },
   active: { label: "Active", className: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25" },
@@ -106,7 +110,7 @@ const STATUS_META: Record<string, { label: string; className: string }> = {
 };
 
 export function StatusPill({ status, label }: { status: string; label?: string }) {
-  const meta = STATUS_META[status] ?? { label: status, className: "bg-slate-500/10 text-slate-400 border-white/10" };
+  const meta = STATUS_META[status] ?? { label: status, className: "bg-white/10 text-muted border-white/10" };
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap border ${meta.className}`}>
       {(status === "completed" || status === "active") && <span className="w-1.5 h-1.5 rounded-full bg-current" />}
@@ -132,10 +136,10 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/60 p-8 text-center">
+    <div className="rounded-2xl border border-dashed border-white/10 bg-surface/60 p-8 text-center">
       <div className="mx-auto mb-3 grid place-items-center w-14 h-14 rounded-2xl bg-white/5 border border-white/10 text-2xl">{icon}</div>
       <p className="font-bold text-white">{title}</p>
-      {description && <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto leading-relaxed">{description}</p>}
+      {description && <p className="text-sm text-muted mt-1 max-w-md mx-auto leading-relaxed">{description}</p>}
       {action && <div className="mt-4 flex justify-center">{action}</div>}
     </div>
   );
@@ -145,7 +149,7 @@ export function EmptyState({
 
 export function StatCardSkeleton() {
   return (
-    <div className="bg-slate-900/70 border border-white/5 rounded-2xl p-5">
+    <div className="bg-surface/70 border border-white/5 rounded-2xl p-5">
       <div className="skeleton h-3 w-24 rounded mb-3" />
       <div className="skeleton h-8 w-20 rounded" />
       <div className="skeleton h-2.5 w-28 rounded mt-2.5" />
@@ -155,8 +159,8 @@ export function StatCardSkeleton() {
 
 export function TableSkeleton({ rows = 5, cols = 5 }: { rows?: number; cols?: number }) {
   return (
-    <div className="bg-slate-900/70 border border-white/5 rounded-2xl overflow-hidden">
-      <div className="flex gap-4 px-5 py-3.5 bg-slate-950/50">
+    <div className="bg-surface/70 border border-white/5 rounded-2xl overflow-hidden">
+      <div className="flex gap-4 px-5 py-3.5 bg-canvas/50">
         {Array.from({ length: cols }).map((_, i) => (
           <div key={i} className="skeleton h-2.5 w-20 rounded flex-1" />
         ))}
@@ -178,7 +182,7 @@ export function SectionHeading({ icon, title, badge, children }: { icon?: ReactN
   return (
     <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
       <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
-        {icon && <span className="grid place-items-center w-8 h-8 rounded-xl bg-[#1877F2]/15 border border-[#1877F2]/30 text-base">{icon}</span>}
+        {icon && <span className="grid place-items-center w-8 h-8 rounded-xl bg-brand/15 border border-brand/30 text-base">{icon}</span>}
         {title}
         {badge}
       </h2>
@@ -192,7 +196,7 @@ export function SectionHeading({ icon, title, badge, children }: { icon?: ReactN
 export function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-center justify-between gap-4 py-3 border-b border-white/5 last:border-0">
-      <p className="text-xs uppercase tracking-wider font-bold text-slate-500">{label}</p>
+      <p className="text-xs uppercase tracking-wider font-bold text-muted">{label}</p>
       <p className="text-sm font-semibold text-white text-right">{value}</p>
     </div>
   );

@@ -16,6 +16,43 @@ signing in — the admin account is bootstrapped automatically on first login).
 Default admin credentials come from `ADMIN_USERNAME` / `ADMIN_PASSWORD`
 (`admin` / `admin123` unless overridden). **Change them after the first login.**
 
+## Dark mode palette
+
+The UI is a single dark theme defined once as Tailwind v4 tokens in
+`src/app/globals.css` (`@theme`). Use the tokens — not raw hex values or the
+default Tailwind palette — so the look stays consistent:
+
+| Token | Hex | Used for |
+| --- | --- | --- |
+| `canvas` | `#0A0A0A` | page background (pitch black) |
+| `surface` | `#1A1A1E` | cards and elevated panels (dark charcoal) |
+| `elevated` | `#23232A` | nested chips, table heads, hover states |
+| `fg` | `#FFFFFF` | primary text |
+| `fg-soft` | `#E7E7EC` | body copy under headings |
+| `muted` | `#9CA3AF` | secondary labels and placeholder text |
+| `brand` | `#FF9900` | call-to-action buttons, active highlights, badges |
+| `brand-deep` | `#F59E0B` | gradient end / hover |
+| `brand-soft` | `#FFC46B` | accent *text* on dark (small labels, links) |
+| `ink` | `#0A0A0A` | text sitting **on** an amber fill |
+| `info` | `#60A5FA` | "pending / waiting" states |
+| `emerald` / `red` | — | success + money / danger |
+
+Rules of thumb:
+
+- **Amber is a highlight, not a decoration** — primary actions, active nav
+  items, count badges and "best value" flags. Secondary row actions (Edit,
+  Delete, Copy, Retry) are neutral chips that turn amber on hover.
+- **Amber fills use `text-ink`, never `text-white`** — white on `#FF9900` is
+  ~2:1, while `#0A0A0A` on `#FF9900` is ~8.6:1.
+- **Pending stays blue (`info`)** so a waiting status never reads as a
+  clickable CTA.
+- Facebook blue and WhatsApp green are kept only inside those brand marks.
+
+`src/app/theme-preview/page.tsx` renders every primitive with mock data
+(sidebar, hero, stats, table, pills, buttons, inputs, empty states) so the
+palette can be reviewed at `/theme-preview` without a database. Nothing links
+to it — delete it whenever you like.
+
 ## Required environment variables
 
 | Variable | Required | Notes |

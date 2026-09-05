@@ -13,8 +13,8 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           minHeight: "100vh",
           display: "grid",
           placeItems: "center",
-          background: "#020617",
-          color: "#e2e8f0",
+          background: "#0A0A0A",
+          color: "#FFFFFF",
           fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
           padding: "24px",
         }}
@@ -25,7 +25,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
             maxWidth: "28rem",
             borderRadius: "1rem",
             border: "1px solid rgba(255,255,255,0.1)",
-            background: "rgba(15,23,42,0.9)",
+            background: "#1A1A1E",
             padding: "1.5rem",
             textAlign: "center",
           }}
@@ -33,7 +33,7 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
           <h1 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#fff", margin: 0 }}>
             Something went wrong
           </h1>
-          <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "#94a3b8" }}>
+          <p style={{ marginTop: "0.5rem", fontSize: "0.875rem", color: "#9CA3AF" }}>
             The app failed to load. Retry — if it persists, check the deployment environment variables.
           </p>
           {error?.message ? (
@@ -42,11 +42,11 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
                 marginTop: "1rem",
                 borderRadius: "0.75rem",
                 border: "1px solid rgba(255,255,255,0.05)",
-                background: "rgba(2,6,23,0.7)",
+                background: "#121215",
                 padding: "0.5rem 0.75rem",
                 fontFamily: "monospace",
                 fontSize: "11px",
-                color: "#94a3b8",
+                color: "#9CA3AF",
                 textAlign: "left",
                 wordBreak: "break-word",
               }}
@@ -62,10 +62,10 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
               borderRadius: "0.75rem",
               padding: "0.625rem 1.1rem",
               border: "none",
-              background: "linear-gradient(135deg, #1877F2, #2563eb)",
-              color: "#fff",
+              background: "linear-gradient(135deg, #FFB020, #FF9900)",
+              color: "#0A0A0A",
               fontSize: "0.875rem",
-              fontWeight: 600,
+              fontWeight: 700,
               cursor: "pointer",
             }}
           >

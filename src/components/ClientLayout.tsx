@@ -10,12 +10,12 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-slate-950 gap-4">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-canvas gap-4">
         <div className="relative">
-          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/10 border-b-[#1877F2]" />
-          <div className="absolute inset-0 rounded-full blur-xl bg-[#1877F2]/25" aria-hidden="true" />
+          <div className="animate-spin rounded-full h-12 w-12 border-2 border-white/10 border-b-brand" />
+          <div className="absolute inset-0 rounded-full blur-xl bg-brand/25" aria-hidden="true" />
         </div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 animate-pulse">Loading SMSFlow…</p>
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted animate-pulse">Loading SMSFlow…</p>
       </div>
     );
   }

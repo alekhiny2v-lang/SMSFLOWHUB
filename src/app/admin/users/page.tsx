@@ -138,7 +138,7 @@ export default function AdminUsers() {
 
       {/* ── Add user ── */}
       {showAdd && (
-        <div className="bg-slate-900/90 border border-[#1877F2]/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-brand/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <h3 className="font-bold text-white mb-4">Add a new user</h3>
           <form onSubmit={handleAdd} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
             <div>
@@ -170,12 +170,12 @@ export default function AdminUsers() {
 
       {/* ── Update balance ── */}
       {balanceForm.userId && (
-        <div className="bg-slate-900/90 border border-emerald-500/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-emerald-500/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <h3 className="font-bold text-white mb-1">
             Update balance — <span className="text-emerald-400">{balanceUser?.username ?? `#${balanceForm.userId}`}</span>{" "}
-            <span className="text-slate-500 font-normal text-sm">current: PKR {balanceUser ? Number(balanceUser.balance).toFixed(2) : "—"}</span>
+            <span className="text-muted font-normal text-sm">current: PKR {balanceUser ? Number(balanceUser.balance).toFixed(2) : "—"}</span>
           </h3>
-          <p className="text-xs text-slate-500 mb-4">Every adjustment is logged as a transaction.</p>
+          <p className="text-xs text-muted mb-4">Every adjustment is logged as a transaction.</p>
           <form onSubmit={handleBalance} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <label className="label">Amount (PKR)</label>
@@ -202,15 +202,15 @@ export default function AdminUsers() {
 
       {/* ── Custom rates ── */}
       {ratesUserId && (
-        <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Custom rates (PKR) — {ratesUser?.username ?? `#${ratesUserId}`}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Leave empty to inherit the default country rate.</p>
+              <p className="text-xs text-muted mt-0.5">Leave empty to inherit the default country rate.</p>
             </div>
             <div className="flex gap-2">
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">⌕</span>
                 <input placeholder="Search country…" value={rateSearch} onChange={(e) => setRateSearch(e.target.value)} className="input pl-8! w-48! py-2! text-xs" />
               </div>
               <button onClick={() => setRatesUserId(null)} className="btn-ghost py-2!">Close</button>
@@ -230,7 +230,7 @@ export default function AdminUsers() {
                 {filteredRates.map((r) => (
                   <tr key={r.countryId} className="tr-hover">
                     <td className="td font-semibold text-white">{r.countryName}</td>
-                    <td className="td text-slate-400 tabular-nums">{r.defaultPkrPrice ? `PKR ${r.defaultPkrPrice.toFixed(2)}` : "-"}</td>
+                    <td className="td text-muted tabular-nums">{r.defaultPkrPrice ? `PKR ${r.defaultPkrPrice.toFixed(2)}` : "-"}</td>
                     <td className="td">
                       <input
                         type="number"
@@ -252,7 +252,7 @@ export default function AdminUsers() {
                 ))}
                 {filteredRates.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="td text-center text-slate-500 py-6">No country matches “{rateSearch}”.</td>
+                    <td colSpan={4} className="td text-center text-muted py-6">No country matches “{rateSearch}”.</td>
                   </tr>
                 )}
               </tbody>
@@ -263,11 +263,11 @@ export default function AdminUsers() {
 
       {/* ── Payment methods ── */}
       {paymentUserId && (
-        <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Payout details — {paymentUser?.username ?? `#${paymentUserId}`}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Accounts the client registered for refunds.</p>
+              <p className="text-xs text-muted mt-0.5">Accounts the client registered for refunds.</p>
             </div>
             <button onClick={() => setPaymentUserId(null)} className="btn-ghost py-2!">Close</button>
           </div>
@@ -276,14 +276,14 @@ export default function AdminUsers() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {paymentMethods.map((pm) => (
-                <div key={pm.id} className={`bg-slate-950/50 border rounded-xl p-4 ${pm.isDefault ? "border-emerald-500/30" : "border-white/5"}`}>
+                <div key={pm.id} className={`bg-canvas/50 border rounded-xl p-4 ${pm.isDefault ? "border-emerald-500/30" : "border-white/5"}`}>
                   <div className="flex items-center gap-2 mb-2">
                     <span className="font-bold text-white">{pm.type}</span>
                     {pm.isDefault && <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 text-[11px] font-bold border border-emerald-500/25">Default</span>}
                   </div>
-                  <p className="text-slate-300 text-sm">{pm.accountName}</p>
-                  <p className="text-slate-400 text-sm font-mono">{pm.accountNumber}</p>
-                  {pm.notes && <p className="text-slate-500 text-xs mt-1">{pm.notes}</p>}
+                  <p className="text-fg-soft text-sm">{pm.accountName}</p>
+                  <p className="text-muted text-sm font-mono">{pm.accountNumber}</p>
+                  {pm.notes && <p className="text-muted text-xs mt-1">{pm.notes}</p>}
                 </div>
               ))}
             </div>
@@ -297,7 +297,7 @@ export default function AdminUsers() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">📋</span>
           All Users
           {loaded && (
-            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+            <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
               {users.length}
             </span>
           )}
@@ -325,10 +325,10 @@ export default function AdminUsers() {
             <tbody>
               {users.map((u) => (
                 <tr key={u.id} className="tr-hover">
-                  <td className="td text-slate-500 tabular-nums">{u.id}</td>
+                  <td className="td text-muted tabular-nums">{u.id}</td>
                   <td className="td">
                     <span className="flex items-center gap-2.5">
-                      <span className="grid place-items-center w-7 h-7 rounded-lg bg-[#1877F2]/15 border border-[#1877F2]/30 text-white text-[10px] font-bold shrink-0">
+                      <span className="grid place-items-center w-7 h-7 rounded-lg bg-brand/15 border border-brand/30 text-white text-[10px] font-bold shrink-0">
                         {u.username.slice(0, 2).toUpperCase()}
                       </span>
                       <span className="font-semibold text-white">{u.username}</span>
@@ -337,7 +337,7 @@ export default function AdminUsers() {
                   <td className="td">
                     <span
                       className={`px-2.5 py-1 rounded-full text-[11px] font-bold border capitalize ${
-                        u.role === "admin" ? "bg-purple-500/10 text-purple-300 border-purple-500/25" : "bg-blue-500/10 text-blue-300 border-blue-500/25"
+                        u.role === "admin" ? "bg-purple-500/10 text-purple-300 border-purple-500/25" : "bg-brand/10 text-brand-soft border-brand/25"
                       }`}
                     >
                       {u.role}
@@ -347,12 +347,12 @@ export default function AdminUsers() {
                   <td className="td">
                     <StatusPill status={u.status} />
                   </td>
-                  <td className="td text-slate-400">{new Date(u.createdAt).toLocaleDateString()}</td>
+                  <td className="td text-muted">{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td className="td">
                     <span className="flex items-center gap-1.5 flex-wrap">
                       <button
                         onClick={() => setBalanceForm({ userId: u.id, amount: "", type: "add", notes: "" })}
-                        className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 transition"
+                        className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 transition"
                       >
                         Balance
                       </button>
@@ -366,7 +366,7 @@ export default function AdminUsers() {
                           </button>
                           <button
                             onClick={() => loadPaymentMethods(u.id)}
-                            className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/25 transition"
+                            className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 transition"
                           >
                             Payments
                           </button>

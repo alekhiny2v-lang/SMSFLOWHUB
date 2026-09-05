@@ -60,7 +60,7 @@ export default function AdminHistory() {
           Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <StatCard label="Total activations" value={activations.length} hint="all clients, all time" icon="📱" tone="blue" />
+            <StatCard label="Total activations" value={activations.length} hint="all clients, all time" icon="📱" tone="brand" />
             <StatCard label="Codes received" value={completed} hint="completed activations" icon="✅" tone="emerald" />
             <StatCard label="Gross revenue" value={`PKR ${revenue.toFixed(2)}`} hint="cancelled orders excluded" icon="💰" tone="white" />
           </>
@@ -73,13 +73,13 @@ export default function AdminHistory() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🗂️</span>
           Full Log
           {loaded && (
-            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+            <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
               {filtered.length}
             </span>
           )}
         </h2>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">⌕</span>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -115,7 +115,7 @@ export default function AdminHistory() {
             <tbody>
               {filtered.map((a) => (
                 <tr key={a.id} className="tr-hover">
-                  <td className="td text-slate-500 tabular-nums">{a.id}</td>
+                  <td className="td text-muted tabular-nums">{a.id}</td>
                   <td className="td font-semibold text-white">{a.username}</td>
                   <td className="td">
                     <span className="flex items-center gap-2.5">
@@ -129,9 +129,9 @@ export default function AdminHistory() {
                     <StatusPill status={a.status} />
                   </td>
                   <td className="td font-mono font-bold">
-                    {a.smsCode ? <span className="text-emerald-400 tracking-wider">{a.smsCode}</span> : <span className="text-slate-600">-</span>}
+                    {a.smsCode ? <span className="text-emerald-400 tracking-wider">{a.smsCode}</span> : <span className="text-muted/70">-</span>}
                   </td>
-                  <td className="td text-slate-400">{new Date(a.createdAt).toLocaleString()}</td>
+                  <td className="td text-muted">{new Date(a.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

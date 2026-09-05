@@ -60,8 +60,8 @@ export default function ClientDashboard() {
         ) : (
           <>
             <StatCard label="Wallet balance" value={me ? `PKR ${Number(me.balance).toFixed(2)}` : "—"} hint="available to spend" icon="💰" tone="emerald" />
-            <StatCard label="My numbers" value={activations.length} hint="all-time purchases" icon="📱" tone="blue" />
-            <StatCard label="Awaiting SMS" value={pending} hint="auto-checking every 5s" icon="⏳" tone="amber" />
+            <StatCard label="My numbers" value={activations.length} hint="all-time purchases" icon="📱" tone="brand" />
+            <StatCard label="Awaiting SMS" value={pending} hint="auto-checking every 5s" icon="⏳" tone="info" />
             <StatCard label="Codes received" value={completed} hint="ready to paste" icon="✅" tone="white" />
           </>
         )}
@@ -73,7 +73,7 @@ export default function ClientDashboard() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🕘</span>
           Recent Numbers
         </h2>
-        <Link href="/client/history" className="text-xs font-bold text-[#8ab9f9] hover:text-white transition">
+        <Link href="/client/history" className="text-xs font-bold text-brand-soft hover:text-white transition">
           View full history →
         </Link>
       </div>
@@ -82,7 +82,7 @@ export default function ClientDashboard() {
         <TableSkeleton rows={5} cols={4} />
       ) : activations.length === 0 ? (
         <EmptyState
-          icon={<FacebookLogo size={26} accessible={false} className="rounded-lg fb-badge-bloom" />}
+          icon={<FacebookLogo size={26} accessible={false} className="rounded-lg brand-badge-bloom" />}
           title="No numbers yet"
           description="Buy your first Facebook number and the OTP will show up here in real time."
           action={
@@ -116,7 +116,7 @@ export default function ClientDashboard() {
                   <td className="td">
                     <StatusPill status={a.status} />
                   </td>
-                  <td className="td text-slate-400">{new Date(a.createdAt).toLocaleString()}</td>
+                  <td className="td text-muted">{new Date(a.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

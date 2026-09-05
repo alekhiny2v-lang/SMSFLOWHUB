@@ -78,7 +78,7 @@ export default function ClientHistory() {
           Array.from({ length: 3 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
-            <StatCard label="Total numbers" value={activations.length} hint="all-time purchases" icon="📱" tone="blue" />
+            <StatCard label="Total numbers" value={activations.length} hint="all-time purchases" icon="📱" tone="brand" />
             <StatCard label="Codes received" value={completed} hint="successfully verified" icon="✅" tone="emerald" />
             <StatCard label="Total spent" value={`PKR ${totalSpent.toFixed(2)}`} hint="refunds excluded" icon="💰" tone="white" />
           </>
@@ -91,14 +91,14 @@ export default function ClientHistory() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🗂️</span>
           Order History
           {loaded && (
-            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+            <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
               {filtered.length}
             </span>
           )}
         </h2>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">⌕</span>
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -112,8 +112,8 @@ export default function ClientHistory() {
               onClick={() => setStatusFilter(s)}
               className={`h-[38px] px-3 rounded-xl text-xs font-bold border capitalize transition ${
                 statusFilter === s
-                  ? "bg-[#1877F2]/15 border-[#1877F2]/45 text-[#8ab9f9]"
-                  : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
+                  ? "bg-brand/15 border-brand/45 text-brand-soft"
+                  : "bg-surface border-white/10 text-muted hover:text-white"
               }`}
             >
               {s}
@@ -165,7 +165,7 @@ export default function ClientHistory() {
                           className={`text-[11px] font-bold px-2 py-0.5 rounded-md border transition ${
                             copiedNumberId === a.id
                               ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                              : "bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border-blue-500/25"
+                              : "bg-brand/10 hover:bg-brand/20 text-brand-soft border-brand/25"
                           }`}
                           title="Copy number"
                         >
@@ -196,11 +196,11 @@ export default function ClientHistory() {
                           </button>
                         </>
                       ) : (
-                        <span className="text-slate-600">-</span>
+                        <span className="text-muted/70">-</span>
                       )}
                     </span>
                   </td>
-                  <td className="td text-slate-400">{new Date(a.createdAt).toLocaleString()}</td>
+                  <td className="td text-muted">{new Date(a.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

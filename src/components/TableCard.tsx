@@ -14,9 +14,9 @@ export function TableCard({
   actions?: ReactNode;
 }) {
   return (
-    <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
+    <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl overflow-hidden">
       {(title || actions) && (
-        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/5 bg-slate-950/40">
+        <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-white/5 bg-canvas/40">
           {typeof title === "string" ? <h3 className="font-bold text-white text-sm">{title}</h3> : title}
           {actions}
         </div>

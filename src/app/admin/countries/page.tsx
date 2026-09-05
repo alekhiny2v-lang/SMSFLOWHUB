@@ -199,11 +199,11 @@ export default function AdminCountries() {
 
       {/* ── Cheap providers ── */}
       {showCheap && (
-        <div className="bg-slate-900/90 border border-emerald-500/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-emerald-500/25 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">Cheap providers (under ${maxPrice})</h3>
-              <p className="text-xs text-slate-500 mt-0.5">{cheapList.length} countries with providers this cheap</p>
+              <p className="text-xs text-muted mt-0.5">{cheapList.length} countries with providers this cheap</p>
             </div>
             <button onClick={() => setShowCheap(false)} className="btn-ghost py-2!">Close</button>
           </div>
@@ -226,14 +226,14 @@ export default function AdminCountries() {
                         <span className="font-semibold text-white">{c.countryCode.toUpperCase()} · {c.smsbowerCountryId}</span>
                       </span>
                     </td>
-                    <td className="td text-slate-400">{c.providers.map((p) => p.providerId).join(", ")}</td>
+                    <td className="td text-muted">{c.providers.map((p) => p.providerId).join(", ")}</td>
                     <td className="td text-emerald-400 font-semibold tabular-nums">{c.providers.map((p) => `$${p.price.toFixed(3)}`).join(", ")}</td>
                     <td className="td tabular-nums">{c.providers.map((p) => p.count).join(", ")}</td>
                   </tr>
                 ))}
                 {cheapList.length === 0 && (
                   <tr>
-                    <td colSpan={4} className="td text-center text-slate-500 py-6">No providers found below ${maxPrice}</td>
+                    <td colSpan={4} className="td text-center text-muted py-6">No providers found below ${maxPrice}</td>
                   </tr>
                 )}
               </tbody>
@@ -244,11 +244,11 @@ export default function AdminCountries() {
 
       {/* ── Sync catalogue ── */}
       {showSync && (
-        <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
+        <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5 animate-fade-in">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="font-bold text-white text-lg">SMSBOWER catalogue</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Pick a country to prefill the form — {syncList.length} available</p>
+              <p className="text-xs text-muted mt-0.5">Pick a country to prefill the form — {syncList.length} available</p>
             </div>
             <button onClick={() => setShowSync(false)} className="btn-ghost py-2!">Close</button>
           </div>
@@ -267,11 +267,11 @@ export default function AdminCountries() {
                 {syncList.map((c) => (
                   <tr key={c.code} className="tr-hover">
                     <td className="td font-semibold text-white">{c.name}</td>
-                    <td className="td uppercase text-slate-400">{c.code}</td>
+                    <td className="td uppercase text-muted">{c.code}</td>
                     <td className="td tabular-nums">{c.smsbowerCountryId}</td>
                     <td className="td tabular-nums">{c.providerCount}</td>
                     <td className="td">
-                      <button onClick={() => importCountry(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-[#1877F2]/10 hover:bg-[#1877F2]/20 text-[#8ab9f9] border border-[#1877F2]/25 transition">
+                      <button onClick={() => importCountry(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 transition">
                         Import →
                       </button>
                     </td>
@@ -284,7 +284,7 @@ export default function AdminCountries() {
       )}
 
       {/* ── Add / edit form ── */}
-      <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5">
+      <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5">
         <h3 className="font-bold text-white text-lg mb-4">
           {editingId ? `Edit country #${editingId}` : "Add country"}
         </h3>
@@ -318,9 +318,9 @@ export default function AdminCountries() {
             <input placeholder="0" type="number" value={form.sortOrder} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} className="input" />
           </div>
           <div className="flex items-end">
-            <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 w-full">
-              <input id="country-active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 rounded accent-[#1877F2]" />
-              <span className="text-sm text-slate-300 font-semibold">Active for clients</span>
+            <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/10 bg-canvas/70 px-4 py-2.5 w-full">
+              <input id="country-active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 rounded accent-brand" />
+              <span className="text-sm text-fg-soft font-semibold">Active for clients</span>
             </label>
           </div>
           <div className="flex gap-2 md:col-span-2 xl:col-span-4">
@@ -340,12 +340,12 @@ export default function AdminCountries() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🗺️</span>
           Catalogue
           {loaded && (
-            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+            <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
               {countries.length}
             </span>
           )}
         </h2>
-        <span className="text-[11px] text-slate-500 font-semibold">{countries.filter((c) => c.active).length} active · {countries.filter((c) => !c.active).length} hidden</span>
+        <span className="text-[11px] text-muted font-semibold">{countries.filter((c) => c.active).length} active · {countries.filter((c) => !c.active).length} hidden</span>
       </div>
 
       {!loaded ? (
@@ -375,13 +375,13 @@ export default function AdminCountries() {
                       <span className="font-semibold text-white">{c.name}</span>
                     </span>
                   </td>
-                  <td className="td uppercase text-slate-400">{c.code}</td>
-                  <td className="td tabular-nums text-slate-400">{c.smsbowerCountryId ?? "-"}</td>
+                  <td className="td uppercase text-muted">{c.code}</td>
+                  <td className="td tabular-nums text-muted">{c.smsbowerCountryId ?? "-"}</td>
                   <td className="td">
                     {c.sellingPkrPrice ? (
                       <span className="text-emerald-400 font-bold tabular-nums">PKR {Number(c.sellingPkrPrice).toFixed(2)}</span>
                     ) : (
-                      <span className="text-slate-500">Auto (markup)</span>
+                      <span className="text-muted">Auto (markup)</span>
                     )}
                   </td>
                   <td className="td tabular-nums">{c.markupPercent}%</td>
@@ -390,7 +390,7 @@ export default function AdminCountries() {
                   </td>
                   <td className="td">
                     <span className="flex items-center gap-1.5">
-                      <button onClick={() => edit(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 transition">
+                      <button onClick={() => edit(c)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 transition">
                         Edit
                       </button>
                       <button onClick={() => remove(c.id)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/25 transition">

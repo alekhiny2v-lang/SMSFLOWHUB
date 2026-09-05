@@ -34,36 +34,36 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-slate-950 flex items-center justify-center p-4">
+    <div className="min-h-screen relative overflow-hidden bg-canvas flex items-center justify-center p-4">
       {/* Aurora background */}
-      <div className="blob w-[38rem] h-[38rem] bg-[#1877F2]/25 -top-40 -left-40" aria-hidden="true" />
-      <div className="blob w-[30rem] h-[30rem] bg-purple-600/15 -bottom-32 -right-24" style={{ animationDelay: "-7s" }} aria-hidden="true" />
-      <div className="blob w-[22rem] h-[22rem] bg-emerald-500/10 top-1/3 right-1/4" style={{ animationDelay: "-13s" }} aria-hidden="true" />
+      <div className="blob w-[38rem] h-[38rem] bg-brand/25 -top-40 -left-40" aria-hidden="true" />
+      <div className="blob w-[30rem] h-[30rem] bg-brand-deep/15 -bottom-32 -right-24" style={{ animationDelay: "-7s" }} aria-hidden="true" />
+      <div className="blob w-[22rem] h-[22rem] bg-white/[0.04] top-1/3 right-1/4" style={{ animationDelay: "-13s" }} aria-hidden="true" />
 
-      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-[#1877F2]/10 bg-slate-900/85">
+      <div className="relative w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 rounded-3xl overflow-hidden border border-white/10 shadow-2xl shadow-brand/10 bg-surface/85">
         {/* ── Brand panel ── */}
-        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-[#1877F2]/20 via-slate-900/40 to-slate-900/10 border-r border-white/10 overflow-hidden">
-          <div className="absolute -left-16 -bottom-24 h-72 w-72 rounded-full bg-[#1877F2]/25 blur-3xl" aria-hidden="true" />
+        <div className="relative hidden lg:flex flex-col justify-between p-10 bg-gradient-to-br from-brand/20 via-surface/40 to-surface/10 border-r border-white/10 overflow-hidden">
+          <div className="absolute -left-16 -bottom-24 h-72 w-72 rounded-full bg-brand/25 blur-3xl" aria-hidden="true" />
 
           <div className="relative flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-[#1877F2]/30">
+            <div className="w-11 h-11 rounded-2xl overflow-hidden border border-white/10 shadow-lg shadow-brand/30">
               <Image src="/logo.png" alt="SMSFlow" width={44} height={44} className="w-full h-full object-cover" />
             </div>
             <div>
               <p className="font-bold text-white text-lg leading-tight">SMSFlow</p>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#8ab9f9] font-bold">Verification Panel</p>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-brand-soft font-bold">Verification Panel</p>
             </div>
           </div>
 
           <div className="relative">
             <div className="flex items-center gap-2.5 mb-5">
-              <FacebookLogo size={30} accessible={false} className="rounded-[8px] fb-badge-bloom" />
-              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8ab9f9]">Facebook numbers · live stock</span>
+              <FacebookLogo size={30} accessible={false} className="rounded-[8px] brand-badge-bloom" />
+              <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-soft">Facebook numbers · live stock</span>
             </div>
             <h2 className="text-3xl font-bold text-white leading-tight">
               Facebook OTP codes,
               <br />
-              <span className="bg-gradient-to-r from-[#8ab9f9] to-white bg-clip-text text-transparent">delivered in seconds.</span>
+              <span className="bg-gradient-to-r from-brand-soft to-white bg-clip-text text-transparent">delivered in seconds.</span>
             </h2>
             <ul className="mt-6 space-y-3">
               {[
@@ -71,8 +71,8 @@ export default function LoginPage() {
                 { Icon: TagIcon, text: "Transparent PKR pricing, no hidden charges" },
                 { Icon: ShieldCheckIcon, text: "No code? Automatic full refund" },
               ].map(({ Icon, text }) => (
-                <li key={text} className="flex items-center gap-3 text-sm text-slate-300">
-                  <span className="grid place-items-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-[#8ab9f9] shrink-0">
+                <li key={text} className="flex items-center gap-3 text-sm text-fg-soft">
+                  <span className="grid place-items-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 text-brand-soft shrink-0">
                     <Icon size={14} />
                   </span>
                   {text}
@@ -81,7 +81,7 @@ export default function LoginPage() {
             </ul>
           </div>
 
-          <div className="relative flex items-center gap-2 text-[11px] text-slate-500">
+          <div className="relative flex items-center gap-2 text-[11px] text-muted">
             <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 text-emerald-400 live-ping" />
             Live stock synced automatically
           </div>
@@ -90,18 +90,18 @@ export default function LoginPage() {
         {/* ── Form panel ── */}
         <div className="relative p-7 sm:p-10">
           <div className="mb-8 text-center lg:text-left">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4 shadow-lg shadow-[#1877F2]/25 border border-white/10 lg:hidden">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl overflow-hidden mb-4 shadow-lg shadow-brand/25 border border-white/10 lg:hidden">
               <Image src="/logo.png" alt="SMSFlow" width={64} height={64} className="w-full h-full object-cover" />
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-white">Welcome back</h1>
-            <p className="text-slate-400 text-sm mt-2">Sign in to your SMSFlow account</p>
+            <p className="text-muted text-sm mt-2">Sign in to your SMSFlow account</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="username" className="label">Username</label>
               <div className="relative">
-                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <UserIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   id="username"
                   type="text"
@@ -117,7 +117,7 @@ export default function LoginPage() {
             <div>
               <label htmlFor="password" className="label">Password</label>
               <div className="relative">
-                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                <LockIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -131,7 +131,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs font-bold px-1.5 py-0.5 rounded transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-fg-soft text-xs font-bold px-1.5 py-0.5 rounded transition"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? "Hide" : "Show"}
@@ -149,7 +149,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full fb-gradient text-white rounded-xl py-3.5 font-bold shadow-lg shadow-[#1877F2]/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 btn-shine flex items-center justify-center gap-2"
+              className="w-full brand-gradient text-ink rounded-xl py-3.5 font-bold shadow-lg shadow-brand/30 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-60 btn-shine flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>
@@ -162,9 +162,9 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-slate-400 text-sm mt-6">
+          <p className="text-center text-muted text-sm mt-6">
             Don&rsquo;t have an account?{" "}
-            <Link href="/signup" className="text-[#8ab9f9] hover:text-white font-semibold transition">
+            <Link href="/signup" className="text-brand-soft hover:text-white font-semibold transition">
               Create one free
             </Link>
           </p>
