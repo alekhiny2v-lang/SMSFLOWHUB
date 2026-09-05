@@ -93,7 +93,7 @@ export function FacebookLogo({ size = 24, variant = "badge", className = "", acc
 export function FacebookChip({ label = "Facebook", className = "" }: { label?: string; className?: string }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-lg border border-[#1877F2]/30 bg-[#1877F2]/10 px-2.5 py-1.5 text-xs font-bold tracking-wide text-[#8ab9f9] ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border border-brand/30 bg-brand/10 px-2.5 py-1.5 text-xs font-bold tracking-wide text-brand-soft ${className}`}
     >
       <FacebookLogo size={14} accessible={false} />
       {label}

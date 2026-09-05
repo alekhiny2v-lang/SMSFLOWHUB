@@ -25,13 +25,18 @@ interface DepositAccount {
   instructions: string;
 }
 
+/**
+ * Deposit account tiles stay neutral: amber is reserved for brand moments
+ * (CTAs, active states, badges), so a per-provider rainbow would dilute it.
+ * The emoji is what distinguishes each provider.
+ */
 const ACCOUNT_STYLE: Record<string, { icon: string; tile: string }> = {
-  JazzCash: { icon: "📱", tile: "bg-red-500/10 border-red-500/25" },
-  EasyPaisa: { icon: "💚", tile: "bg-emerald-500/10 border-emerald-500/25" },
-  NayaPay: { icon: "💳", tile: "bg-indigo-500/10 border-indigo-500/25" },
-  SadaPay: { icon: "🧡", tile: "bg-orange-500/10 border-orange-500/25" },
-  "Bank Transfer": { icon: "🏦", tile: "bg-blue-500/10 border-blue-500/25" },
-  Cryptocurrency: { icon: "₿", tile: "bg-amber-500/10 border-amber-500/25" },
+  JazzCash: { icon: "📱", tile: "bg-white/5 border-white/10" },
+  EasyPaisa: { icon: "💚", tile: "bg-white/5 border-white/10" },
+  NayaPay: { icon: "💳", tile: "bg-white/5 border-white/10" },
+  SadaPay: { icon: "🧡", tile: "bg-white/5 border-white/10" },
+  "Bank Transfer": { icon: "🏦", tile: "bg-white/5 border-white/10" },
+  Cryptocurrency: { icon: "₿", tile: "bg-white/5 border-white/10" },
   Other: { icon: "💰", tile: "bg-white/5 border-white/10" },
 };
 
@@ -115,13 +120,13 @@ export default function ClientDeposits() {
             {accounts.map((a) => {
               const style = ACCOUNT_STYLE[a.type] ?? ACCOUNT_STYLE.Other;
               return (
-                <div key={a.id} className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 card-hover hover:border-[#1877F2]/40 transition-colors">
+                <div key={a.id} className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 card-hover hover:border-brand/40 transition-colors">
                   <div className="flex items-center justify-between gap-3 mb-3.5">
                     <div className="flex items-center gap-3 min-w-0">
                       <span className={`grid place-items-center w-10 h-10 rounded-xl border text-lg shrink-0 ${style.tile}`}>{style.icon}</span>
                       <div className="min-w-0">
                         <h3 className="font-bold text-white truncate">{a.type}</h3>
-                        <p className="text-[11px] text-slate-500 truncate">{a.accountName}</p>
+                        <p className="text-[11px] text-muted truncate">{a.accountName}</p>
                       </div>
                     </div>
                     <button
@@ -129,16 +134,16 @@ export default function ClientDeposits() {
                       className={`shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg border transition ${
                         copiedId === a.id
                           ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                          : "bg-white/5 text-slate-300 border-white/10 hover:bg-white/10 hover:text-white"
+                          : "bg-white/5 text-fg-soft border-white/10 hover:bg-white/10 hover:text-white"
                       }`}
                     >
                       {copiedId === a.id ? "✓ Copied" : "Copy"}
                     </button>
                   </div>
-                  <p className="text-emerald-400 font-mono font-bold text-lg tracking-wide text-center bg-slate-950/60 rounded-xl py-2.5 border border-white/5">
+                  <p className="text-emerald-400 font-mono font-bold text-lg tracking-wide text-center bg-canvas/60 rounded-xl py-2.5 border border-white/5">
                     {a.accountNumber}
                   </p>
-                  {a.instructions && <p className="text-slate-500 text-xs mt-2.5 leading-relaxed">💡 {a.instructions}</p>}
+                  {a.instructions && <p className="text-muted text-xs mt-2.5 leading-relaxed">💡 {a.instructions}</p>}
                 </div>
               );
             })}
@@ -147,14 +152,14 @@ export default function ClientDeposits() {
       )}
 
       {/* ── Request form ── */}
-      <div className="mt-6 rounded-2xl border border-[#1877F2]/25 bg-slate-900/90 shadow-xl p-5 relative overflow-hidden">
-        <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#1877F2]/15 blur-3xl" aria-hidden="true" />
+      <div className="mt-6 rounded-2xl border border-brand/25 bg-surface/90 shadow-xl p-5 relative overflow-hidden">
+        <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
         <div className="relative">
           <h3 className="font-bold text-white mb-1 flex items-center gap-2">
-            <span className="grid place-items-center w-7 h-7 rounded-lg fb-gradient text-white text-xs font-bold">2</span>
+            <span className="grid place-items-center w-7 h-7 rounded-lg brand-gradient text-ink text-xs font-bold">2</span>
             Submit your deposit
           </h3>
-          <p className="text-xs text-slate-500 mb-4 ml-9">Enter the amount you sent and the transaction reference so we can match it.</p>
+          <p className="text-xs text-muted mb-4 ml-9">Enter the amount you sent and the transaction reference so we can match it.</p>
           <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             <div>
               <label className="label" htmlFor="dep-amount">Amount (PKR)</label>
@@ -225,8 +230,8 @@ export default function ClientDeposits() {
                   <td className="td">
                     <StatusPill status={t.status} />
                   </td>
-                  <td className="td font-mono text-slate-400">{t.reference || "-"}</td>
-                  <td className="td text-slate-400">{new Date(t.createdAt).toLocaleString()}</td>
+                  <td className="td font-mono text-muted">{t.reference || "-"}</td>
+                  <td className="td text-muted">{new Date(t.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>

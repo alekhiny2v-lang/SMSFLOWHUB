@@ -57,7 +57,7 @@ export default function AdminDeposits() {
         description="Verify each transaction reference before approving — approved amounts are credited to the client's balance instantly."
         icon={<span>💰</span>}
       >
-        <span className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/25 px-3.5 py-2 text-[11px] font-bold text-amber-300">
+        <span className="hidden sm:inline-flex items-center gap-2 rounded-xl bg-info/10 border border-info/25 px-3.5 py-2 text-[11px] font-bold text-info">
           ⏳ {transactions.length} waiting · PKR {totalPending.toFixed(2)}
         </span>
       </PageHero>
@@ -90,14 +90,14 @@ export default function AdminDeposits() {
               <tbody>
                 {transactions.map((t) => (
                   <tr key={t.id} className="tr-hover">
-                    <td className="td text-slate-500 tabular-nums">{t.id}</td>
+                    <td className="td text-muted tabular-nums">{t.id}</td>
                     <td className="td font-semibold text-white">{t.username || t.userId}</td>
                     <td className="td">{t.type}</td>
                     <td className="td font-bold text-emerald-400 tabular-nums">PKR {Number(t.amount).toFixed(2)}</td>
                     <td className="td">{t.method}</td>
-                    <td className="td font-mono text-slate-400">{t.reference || "-"}</td>
-                    <td className="td text-slate-400 max-w-[160px] truncate">{t.notes || "-"}</td>
-                    <td className="td text-slate-400">{new Date(t.createdAt).toLocaleString()}</td>
+                    <td className="td font-mono text-muted">{t.reference || "-"}</td>
+                    <td className="td text-muted max-w-[160px] truncate">{t.notes || "-"}</td>
+                    <td className="td text-muted">{new Date(t.createdAt).toLocaleString()}</td>
                     <td className="td">
                       <span className="flex items-center gap-1.5">
                         <button

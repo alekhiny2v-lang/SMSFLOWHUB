@@ -59,14 +59,14 @@ export default function ClientProfile() {
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 mt-6 items-start">
         {/* ── Account card ── */}
-        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-slate-900/90 shadow-xl p-6 relative overflow-hidden">
-          <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-[#1877F2]/15 blur-3xl" aria-hidden="true" />
+        <div className="lg:col-span-2 rounded-2xl border border-white/10 bg-surface/90 shadow-xl p-6 relative overflow-hidden">
+          <div className="absolute -right-14 -top-16 h-40 w-40 rounded-full bg-brand/15 blur-3xl" aria-hidden="true" />
           <div className="relative flex flex-col items-center text-center border-b border-white/5 pb-5 mb-2">
-            <span className="grid place-items-center w-16 h-16 rounded-2xl fb-gradient text-white text-xl font-bold shadow-lg shadow-[#1877F2]/30 mb-3">
+            <span className="grid place-items-center w-16 h-16 rounded-2xl brand-gradient text-ink text-xl font-bold shadow-lg shadow-brand/30 mb-3">
               {me ? me.username.slice(0, 2).toUpperCase() : "··"}
             </span>
             <p className="font-bold text-white text-lg">{me?.username ?? "…"}</p>
-            <span className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-[#1877F2]/10 text-[#8ab9f9] border-[#1877F2]/30 capitalize">
+            <span className="mt-1.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border bg-brand/10 text-brand-soft border-brand/30 capitalize">
               {(me?.role ?? "client") + " account"}
             </span>
           </div>
@@ -79,12 +79,12 @@ export default function ClientProfile() {
         </div>
 
         {/* ── Password card ── */}
-        <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-slate-900/90 shadow-xl p-6">
+        <div className="lg:col-span-3 rounded-2xl border border-white/10 bg-surface/90 shadow-xl p-6">
           <h3 className="font-bold text-white text-lg mb-1 flex items-center gap-2.5">
             <span className="grid place-items-center w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/25 text-sm">🔐</span>
             Change Password
           </h3>
-          <p className="text-xs text-slate-500 mb-5">Use a long, unique password you don&rsquo;t use anywhere else.</p>
+          <p className="text-xs text-muted mb-5">Use a long, unique password you don&rsquo;t use anywhere else.</p>
 
           {message && (
             <div className={`rounded-xl p-4 mb-5 border ${isError ? "bg-red-500/10 border-red-500/25" : "bg-emerald-500/10 border-emerald-500/25"}`}>
@@ -135,12 +135,12 @@ export default function ClientProfile() {
               </div>
             </div>
             <div className="flex items-center justify-between gap-3 flex-wrap pt-1">
-              <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs text-muted cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showPasswords}
                   onChange={(e) => setShowPasswords(e.target.checked)}
-                  className="w-4 h-4 rounded accent-[#1877F2]"
+                  className="w-4 h-4 rounded accent-brand"
                 />
                 Show passwords
               </label>

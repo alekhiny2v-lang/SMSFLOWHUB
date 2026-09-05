@@ -91,10 +91,10 @@ function getStatusMeta(status: string, hasCode: boolean) {
       ring: "border-emerald-500/40",
     };
   if (status === "pending")
-    return { label: "Waiting for SMS", pill: "bg-amber-500/10 text-amber-300 border border-amber-500/25", ring: "border-[#1877F2]/40" };
+    return { label: "Waiting for SMS", pill: "bg-info/10 text-info border border-info/25", ring: "border-brand/40" };
   if (status === "cancelled")
     return { label: "Cancelled", pill: "bg-red-500/10 text-red-400 border border-red-500/25", ring: "border-red-500/35" };
-  return { label: status, pill: "bg-slate-500/10 text-slate-400 border border-white/10", ring: "border-white/10" };
+  return { label: status, pill: "bg-white/10 text-muted border border-white/10", ring: "border-white/10" };
 }
 
 /**
@@ -119,15 +119,15 @@ const TimeoutBar = memo(function TimeoutBar({ createdAt }: { createdAt: string }
   return (
     <div className="mt-4">
       <div className="flex items-center justify-between text-xs mb-1.5">
-        <span className="text-slate-500">Free-cancel window</span>
-        <span className={`font-mono font-bold tabular-nums ${urgent ? "text-red-400" : "text-slate-300"}`}>
+        <span className="text-muted">Free-cancel window</span>
+        <span className={`font-mono font-bold tabular-nums ${urgent ? "text-red-400" : "text-fg-soft"}`}>
           {urgent ? "Expiring " : "Timeout "}
           {formatCountdown(remaining)}
         </span>
       </div>
       <div className="h-1.5 w-full rounded-full bg-white/5 overflow-hidden">
         <div
-          className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${urgent ? "bg-red-500" : "bg-[#1877F2]"}`}
+          className={`h-full rounded-full transition-[width] duration-1000 ease-linear ${urgent ? "bg-red-500" : "bg-brand"}`}
           style={{ width: `${leftPercent}%` }}
         />
       </div>
@@ -173,16 +173,16 @@ const ActivationCard = memo(function ActivationCard({
   const meta = getStatusMeta(a.status, hasCode);
 
   return (
-    <div className={`bg-slate-900/90 border ${meta.ring} rounded-2xl shadow-xl p-5 pl-6 card-hover relative overflow-hidden`}>
+    <div className={`bg-surface/90 border ${meta.ring} rounded-2xl shadow-xl p-5 pl-6 card-hover relative overflow-hidden`}>
       {/* Facebook service strip */}
-      <div className="absolute inset-y-0 left-0 w-1.5 fb-gradient" aria-hidden="true" />
+      <div className="absolute inset-y-0 left-0 w-1.5 brand-gradient" aria-hidden="true" />
 
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
           <span className="text-3xl leading-none shrink-0">{getCountryFlagByName(a.countryName)}</span>
           <div className="min-w-0">
             <p className="font-bold text-white text-base truncate">{a.countryName || "Unknown"}</p>
-            <p className="text-slate-500 text-[11px] uppercase tracking-wider font-semibold">
+            <p className="text-muted text-[11px] uppercase tracking-wider font-semibold">
               {new Date(a.createdAt).toLocaleString()}
             </p>
           </div>
@@ -190,12 +190,12 @@ const ActivationCard = memo(function ActivationCard({
         <span className={`shrink-0 px-2.5 py-1 rounded-full text-[11px] font-bold whitespace-nowrap ${meta.pill}`}>{meta.label}</span>
       </div>
 
-      <p className="text-slate-200 text-sm lg:text-base font-mono flex items-center gap-2 mb-3 flex-wrap">
+      <p className="text-fg text-sm lg:text-base font-mono flex items-center gap-2 mb-3 flex-wrap">
         <span>{a.phoneNumber || "-"}</span>
         {a.phoneNumber && (
           <button
             onClick={() => onCopyNumber(a.phoneNumber || "", a.id)}
-            className="text-[11px] bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 px-2 py-0.5 rounded-md transition font-semibold"
+            className="text-[11px] bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 px-2 py-0.5 rounded-md transition font-semibold"
             title="Copy the phone number to paste into Facebook"
           >
             {copiedNumber ? "✓ Copied" : "Copy number"}
@@ -203,8 +203,8 @@ const ActivationCard = memo(function ActivationCard({
         )}
       </p>
 
-      <div className="bg-slate-950/60 rounded-xl p-4 text-center border border-white/5">
-        <p className="text-[11px] text-slate-500 mb-2 uppercase tracking-widest font-semibold">Facebook OTP / SMS code</p>
+      <div className="bg-canvas/60 rounded-xl p-4 text-center border border-white/5">
+        <p className="text-[11px] text-muted mb-2 uppercase tracking-widest font-semibold">Facebook OTP / SMS code</p>
         {hasCode ? (
           <div className="flex items-center justify-center gap-3 flex-wrap">
             <p className="text-4xl lg:text-5xl font-bold text-emerald-400 font-mono tracking-[0.18em] tabular-nums">{a.smsCode}</p>
@@ -220,9 +220,9 @@ const ActivationCard = memo(function ActivationCard({
           <p className="text-lg font-bold text-red-400">Cancelled — number released</p>
         ) : (
           <div>
-            <p className="text-slate-500 text-sm italic">Waiting for OTP…</p>
+            <p className="text-muted text-sm italic">Waiting for OTP…</p>
             <div className="mt-3 flex justify-center">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1877F2]" />
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-brand" />
             </div>
           </div>
         )}
@@ -231,7 +231,7 @@ const ActivationCard = memo(function ActivationCard({
       <div className="flex flex-wrap items-center justify-between gap-2 mt-4">
         <div className="flex items-center gap-2 flex-wrap">
           <FacebookChip />
-          <span className="text-[11px] text-slate-400 bg-slate-950/60 border border-white/5 px-2 py-1 rounded-lg font-semibold tabular-nums">
+          <span className="text-[11px] text-muted bg-canvas/60 border border-white/5 px-2 py-1 rounded-lg font-semibold tabular-nums">
             Charged {formatPkr(Number(a.salePrice ?? a.cost ?? 0))}
           </span>
         </div>
@@ -250,7 +250,7 @@ const ActivationCard = memo(function ActivationCard({
             <button
               onClick={() => onAction(a.id, "retry")}
               disabled={isProcessing}
-              className="bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-60"
+              className="bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 px-3.5 py-2 rounded-xl text-xs font-bold transition disabled:opacity-60"
               title="Ask the provider for the code right now"
             >
               Retry
@@ -299,8 +299,8 @@ const CountryCard = memo(function CountryCard({
 
   return (
     <div
-      className={`bg-slate-900/90 border rounded-2xl shadow-xl p-5 card-hover flex flex-col ${
-        outOfStock ? "border-white/5 opacity-75" : "border-white/10 hover:border-[#1877F2]/45"
+      className={`bg-surface/90 border rounded-2xl shadow-xl p-5 card-hover flex flex-col ${
+        outOfStock ? "border-white/5 opacity-75" : "border-white/10 hover:border-brand/45"
       }`}
     >
       <div className="flex items-start gap-3 mb-4">
@@ -314,20 +314,20 @@ const CountryCard = memo(function CountryCard({
               </span>
             )}
           </div>
-          <p className="text-slate-500 text-[11px] uppercase tracking-widest font-semibold">{p.code}</p>
+          <p className="text-muted text-[11px] uppercase tracking-widest font-semibold">{p.code}</p>
         </div>
-        <FacebookLogo size={26} accessible={false} className="shrink-0 rounded-[7px] shadow-lg shadow-[#1877F2]/25" />
+        <FacebookLogo size={26} accessible={false} className="shrink-0 rounded-[7px] shadow-lg shadow-brand/25" />
       </div>
 
       <div className="flex items-end justify-between mb-3">
         <div>
-          <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold mb-0.5">Price</p>
+          <p className="text-[11px] text-muted uppercase tracking-wider font-semibold mb-0.5">Price</p>
           <p className="text-2xl font-bold text-white tabular-nums">{formatPkr(p.pkrPrice)}</p>
-          <p className="text-[11px] text-slate-500">{p.isCustomRate ? "your custom rate" : p.isFixedRate ? "fixed rate" : "per number"}</p>
+          <p className="text-[11px] text-muted">{p.isCustomRate ? "your custom rate" : p.isFixedRate ? "fixed rate" : "per number"}</p>
         </div>
         <div className="text-right">
-          <p className="text-[11px] text-slate-500 uppercase tracking-wider font-semibold mb-0.5">In stock</p>
-          <p className={`text-lg font-bold tabular-nums ${outOfStock ? "text-red-400" : p.isCustomRate ? "text-blue-300" : "text-emerald-400"}`}>
+          <p className="text-[11px] text-muted uppercase tracking-wider font-semibold mb-0.5">In stock</p>
+          <p className={`text-lg font-bold tabular-nums ${outOfStock ? "text-red-400" : p.isCustomRate ? "text-brand-soft" : "text-emerald-400"}`}>
             {outOfStock ? "None" : p.count}
           </p>
         </div>
@@ -335,7 +335,7 @@ const CountryCard = memo(function CountryCard({
 
       <div className="h-1.5 rounded-full bg-white/5 overflow-hidden mb-4" title={`${stock} numbers available`}>
         <div
-          className={`h-full rounded-full ${outOfStock ? "bg-red-500/45" : stockPercent > 35 ? "bg-emerald-500" : "bg-amber-500"}`}
+          className={`h-full rounded-full ${outOfStock ? "bg-red-500/45" : stockPercent > 35 ? "bg-emerald-500" : "bg-brand"}`}
           style={{ width: `${outOfStock ? 100 : Math.max(6, stockPercent)}%` }}
         />
       </div>
@@ -343,7 +343,7 @@ const CountryCard = memo(function CountryCard({
       <button
         onClick={() => onBuy(p.id)}
         disabled={disabled || outOfStock}
-        className="mt-auto w-full fb-gradient text-white rounded-xl py-3 font-bold shadow-lg shadow-[#1877F2]/25 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:brightness-100 text-sm btn-shine flex items-center justify-center gap-2"
+        className="mt-auto w-full brand-gradient text-ink rounded-xl py-3 font-bold shadow-lg shadow-brand/25 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:brightness-100 text-sm btn-shine flex items-center justify-center gap-2"
       >
         {isBuying ? (
           <>
@@ -364,7 +364,7 @@ const CountryCard = memo(function CountryCard({
 });
 
 const SkeletonCard = ({ blocks = 2 }: { blocks?: number }) => (
-  <div className="bg-slate-900/70 border border-white/5 rounded-2xl p-5">
+  <div className="bg-surface/70 border border-white/5 rounded-2xl p-5">
     <div className="flex items-center gap-3 mb-4">
       <div className="skeleton h-8 w-8 rounded-lg" />
       <div className="flex-1 space-y-2">
@@ -444,18 +444,18 @@ function PinnedBuyBox({
 
   return (
     <div
-      className={`${pinned ? "sticky top-16 lg:top-0" : "relative"} z-30 -mx-4 lg:-mx-8 px-4 lg:px-8 pt-2 pb-2.5 bg-slate-950/90 backdrop-blur-xl ${
-        pinned ? "border-b border-[#1877F2]/20" : "border-b border-transparent"
+      className={`${pinned ? "sticky top-16 lg:top-0" : "relative"} z-30 -mx-4 lg:-mx-8 px-4 lg:px-8 pt-2 pb-2.5 bg-canvas/90 backdrop-blur-xl ${
+        pinned ? "border-b border-brand/20" : "border-b border-transparent"
       }`}
     >
-      <div className="rounded-2xl border border-[#1877F2]/30 bg-slate-900/95 fb-glow">
+      <div className="rounded-2xl border border-brand/30 bg-surface/95 brand-glow">
         <div className="flex flex-wrap items-center gap-2 p-2 lg:flex-nowrap lg:gap-3 lg:p-3 lg:px-4">
           <div className="flex items-center gap-2.5 lg:gap-3 lg:pr-4 lg:border-r lg:border-white/10">
-            <FacebookLogo size={30} accessible={false} className="shrink-0 rounded-[8px] fb-badge-bloom lg:hidden" />
-            <FacebookLogo size={34} accessible={false} className="hidden lg:block shrink-0 rounded-[9px] fb-badge-bloom" />
+            <FacebookLogo size={30} accessible={false} className="shrink-0 rounded-[8px] brand-badge-bloom lg:hidden" />
+            <FacebookLogo size={34} accessible={false} className="hidden lg:block shrink-0 rounded-[9px] brand-badge-bloom" />
             <div className="min-w-0 hidden lg:block">
               <p className="font-bold text-white text-sm leading-tight">Buy Facebook Number</p>
-              <p className="text-[11px] text-slate-400 leading-tight flex items-center gap-1.5 mt-0.5">
+              <p className="text-[11px] text-muted leading-tight flex items-center gap-1.5 mt-0.5">
                 <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 text-emerald-400 live-ping" />
                 <SyncLabel updatedAt={lastUpdated} loading={loading} />
               </p>
@@ -467,11 +467,11 @@ function PinnedBuyBox({
               onClick={onToggleExpanded}
               aria-expanded={expanded}
               title="Change country"
-              className="flex-1 min-w-0 flex items-center gap-2 lg:gap-2.5 bg-slate-950/70 hover:bg-slate-950 border border-white/10 hover:border-[#1877F2]/45 rounded-xl px-2.5 lg:px-3 py-2 text-left transition"
+              className="flex-1 min-w-0 flex items-center gap-2 lg:gap-2.5 bg-canvas/70 hover:bg-canvas border border-white/10 hover:border-brand/45 rounded-xl px-2.5 lg:px-3 py-2 text-left transition"
             >
               <span className="text-lg lg:text-xl leading-none shrink-0">{selected ? getCountryFlagByName(selected.name) : "🌍"}</span>
               <span className="flex-1 min-w-0">
-                <span className="hidden sm:block text-[10px] uppercase tracking-widest text-slate-500 font-bold leading-tight">Country</span>
+                <span className="hidden sm:block text-[10px] uppercase tracking-widest text-muted font-bold leading-tight">Country</span>
                 <span className="block text-[13px] lg:text-sm font-bold text-white truncate leading-snug">
                   {loading ? "Loading countries…" : selected ? selected.name : "No country available"}
                 </span>
@@ -482,11 +482,11 @@ function PinnedBuyBox({
               <span className={`text-[11px] font-bold shrink-0 tabular-nums ${outOfStock ? "text-red-400" : "text-emerald-400"}`}>
                 {loading ? "" : outOfStock ? "0 left" : `${stock} left`}
               </span>
-              <span className={`text-slate-500 text-xs transition-transform shrink-0 ${expanded ? "rotate-180" : ""}`}>▾</span>
+              <span className={`text-muted text-xs transition-transform shrink-0 ${expanded ? "rotate-180" : ""}`}>▾</span>
             </button>
 
-            <div className="hidden sm:block shrink-0 bg-slate-950/70 border border-white/10 rounded-xl px-3 py-2 min-w-[112px]">
-              <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold leading-tight">Balance</p>
+            <div className="hidden sm:block shrink-0 bg-canvas/70 border border-white/10 rounded-xl px-3 py-2 min-w-[112px]">
+              <p className="text-[10px] uppercase tracking-widest text-muted font-bold leading-tight">Balance</p>
               <p className={`text-sm font-bold tabular-nums leading-snug ${insufficient ? "text-red-400" : "text-emerald-400"}`}>
                 {balance === null ? "—" : formatPkr(balance)}
               </p>
@@ -496,7 +496,7 @@ function PinnedBuyBox({
               onClick={() => selected && onBuy(selected.id)}
               disabled={busy || !selected || outOfStock}
               title={outOfStock ? "This country is out of stock — pick another" : undefined}
-              className="shrink-0 flex-none w-auto lg:w-[224px] fb-gradient text-white rounded-xl px-3.5 lg:px-4 py-2 lg:py-2.5 font-bold text-xs lg:text-sm shadow-lg shadow-[#1877F2]/25 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:brightness-100 btn-shine flex items-center justify-center gap-1.5 lg:gap-2"
+              className="shrink-0 flex-none w-auto lg:w-[224px] brand-gradient text-ink rounded-xl px-3.5 lg:px-4 py-2 lg:py-2.5 font-bold text-xs lg:text-sm shadow-lg shadow-brand/25 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:brightness-100 btn-shine flex items-center justify-center gap-1.5 lg:gap-2"
             >
               {buyingId === selected?.id ? (
                 <>
@@ -519,7 +519,7 @@ function PinnedBuyBox({
             <button
               onClick={onRefresh}
               title="Refresh live stock and prices"
-              className="w-8 h-8 lg:w-9 lg:h-9 grid place-items-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 transition"
+              className="w-8 h-8 lg:w-9 lg:h-9 grid place-items-center rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-fg-soft transition"
             >
               <span className={refreshing ? "animate-spin inline-block" : "inline-block"}>⟳</span>
             </button>
@@ -528,7 +528,7 @@ function PinnedBuyBox({
               title={pinned ? "Unpin — let the buy box scroll away with the page" : "Pin — keep the buy box at the top"}
               aria-pressed={pinned}
               className={`hidden sm:flex h-8 lg:h-9 px-2.5 lg:px-3 rounded-xl text-[11px] font-bold border items-center gap-1.5 transition ${
-                pinned ? "bg-[#1877F2]/15 border-[#1877F2]/45 text-[#8ab9f9]" : "bg-white/5 border-white/10 text-slate-400 hover:text-white"
+                pinned ? "bg-brand/15 border-brand/45 text-brand-soft" : "bg-white/5 border-white/10 text-muted hover:text-white"
               }`}
             >
               📌 <span className="hidden lg:inline">{pinned ? "Pinned" : "Pin to top"}</span>
@@ -540,40 +540,40 @@ function PinnedBuyBox({
           <div className="border-t border-white/10 p-3 lg:px-4">
             <div className="flex items-center gap-2 mb-2.5">
               <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">⌕</span>
                 <input
                   ref={searchRef}
                   value={panelQuery}
                   onChange={(e) => onPanelQuery(e.target.value)}
                   placeholder="Search country — e.g. Pakistan, Bangladesh, Indonesia…"
-                  className="w-full bg-slate-950/70 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1877F2]/60 focus:ring-2 focus:ring-[#1877F2]/20 transition"
+                  className="w-full bg-canvas/70 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-sm text-white placeholder:text-muted focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 transition"
                 />
               </div>
               <button
                 onClick={onToggleExpanded}
-                className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-400 text-xs font-bold transition shrink-0"
+                className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-muted text-xs font-bold transition shrink-0"
               >
                 Close
               </button>
             </div>
 
-            <div className="max-h-[42vh] overflow-y-auto overscroll-contain rounded-xl border border-white/5 divide-y divide-white/5 bg-slate-950/40 list-perf-rows">
+            <div className="max-h-[42vh] overflow-y-auto overscroll-contain rounded-xl border border-white/5 divide-y divide-white/5 bg-canvas/40 list-perf-rows">
               {panelRows.length === 0 ? (
-                <p className="p-4 text-sm text-slate-500">{loading ? "Loading countries…" : `No country matches “${panelQuery}”.`}</p>
+                <p className="p-4 text-sm text-muted">{loading ? "Loading countries…" : `No country matches “${panelQuery}”.`}</p>
               ) : (
                 panelRows.map((p) => {
                   const isActive = selected?.id === p.id;
                   const count = p.count ?? 0;
                   return (
-                    <div key={p.id} className={`flex items-center gap-3 px-3 py-2.5 transition ${isActive ? "bg-[#1877F2]/10" : "hover:bg-white/5"}`}>
+                    <div key={p.id} className={`flex items-center gap-3 px-3 py-2.5 transition ${isActive ? "bg-brand/10" : "hover:bg-white/5"}`}>
                       <button onClick={() => onSelectFromPanel(p.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left" title="Use this country in the buy box">
                         <span className="text-xl leading-none shrink-0">{getCountryFlagByName(p.name)}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold text-white truncate">
                             {p.name}
-                            {isActive && <span className="ml-2 text-[10px] font-bold text-[#8ab9f9] uppercase tracking-wider">selected</span>}
+                            {isActive && <span className="ml-2 text-[10px] font-bold text-brand-soft uppercase tracking-wider">selected</span>}
                           </span>
-                          <span className="block text-[11px] text-slate-500 uppercase tracking-wider">
+                          <span className="block text-[11px] text-muted uppercase tracking-wider">
                             {p.code} · {p.isCustomRate ? "custom rate" : p.isFixedRate ? "fixed rate" : "live rate"}
                           </span>
                         </span>
@@ -585,7 +585,7 @@ function PinnedBuyBox({
                       <button
                         onClick={() => onBuy(p.id)}
                         disabled={busy || count <= 0}
-                        className="shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg fb-gradient text-white disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition"
+                        className="shrink-0 text-[11px] font-bold px-2.5 py-1.5 rounded-lg brand-gradient text-ink disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 transition"
                       >
                         Buy
                       </button>
@@ -595,9 +595,9 @@ function PinnedBuyBox({
               )}
             </div>
 
-            <p className="mt-2 text-[11px] text-slate-500 flex items-center gap-1.5 flex-wrap">
+            <p className="mt-2 text-[11px] text-muted flex items-center gap-1.5 flex-wrap">
               <FacebookLogo size={12} accessible={false} className="rounded-[3px] shrink-0" />
-              <span className="text-slate-400">
+              <span className="text-muted">
                 <SyncLabel updatedAt={lastUpdated} loading={loading} />
               </span>
               <span className="hidden sm:inline">· {total} countries listed · {panelRows.length} shown</span>
@@ -608,9 +608,9 @@ function PinnedBuyBox({
       </div>
 
       {insufficient && !loading && (
-        <p className="mt-2 text-xs text-amber-300 flex flex-wrap items-center gap-2">
+        <p className="mt-2 text-xs text-brand-soft flex flex-wrap items-center gap-2">
           Your balance is below {selected ? formatPkr(selected.pkrPrice) : "this price"}.
-          <Link href="/client/deposits" className="underline decoration-dotted underline-offset-2 text-[#8ab9f9] hover:text-white font-semibold">
+          <Link href="/client/deposits" className="underline decoration-dotted underline-offset-2 text-brand-soft hover:text-white font-semibold">
             Add balance →
           </Link>
         </p>
@@ -911,17 +911,17 @@ export default function BuyNumber() {
       />
 
       {/* ── Header ── */}
-      <section className="mt-5 lg:mt-6 relative overflow-hidden rounded-2xl border border-[#1877F2]/25 bg-gradient-to-br from-[#1877F2]/15 via-slate-900/60 to-slate-900/30 p-5 lg:p-6">
-        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-[#1877F2]/20 blur-3xl" aria-hidden="true" />
+      <section className="mt-5 lg:mt-6 relative overflow-hidden rounded-2xl border border-brand/25 bg-gradient-to-br from-brand/15 via-surface/60 to-surface/30 p-5 lg:p-6">
+        <div className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-brand/20 blur-3xl" aria-hidden="true" />
         <div className="relative flex flex-col lg:flex-row lg:items-center gap-5">
           <div className="flex items-center gap-4 flex-1 min-w-0">
-            <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-2.5 fb-glow">
+            <div className="shrink-0 rounded-2xl bg-white/5 border border-white/10 p-2.5 brand-glow">
               <FacebookLogo size={44} accessible={false} className="rounded-xl" />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#8ab9f9]">SMSFlow · Facebook verification service</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-soft">SMSFlow · Facebook verification service</p>
               <h1 className="text-2xl lg:text-3xl font-bold text-white leading-tight">Facebook Numbers, Live Stock</h1>
-              <p className="text-slate-400 text-sm mt-1">
+              <p className="text-muted text-sm mt-1">
                 Instant virtual numbers for Facebook OTP / SMS verification — live stock, transparent PKR pricing, free refund when no code arrives.
               </p>
             </div>
@@ -932,7 +932,7 @@ export default function BuyNumber() {
               title={prefs.soundOn ? "Play a chime when an OTP lands" : "OTP chime is muted"}
               aria-pressed={prefs.soundOn}
               className={`h-9 px-3 rounded-xl text-[11px] font-bold border transition flex items-center gap-1.5 ${
-                prefs.soundOn ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300" : "bg-white/5 border-white/10 text-slate-500"
+                prefs.soundOn ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-300" : "bg-white/5 border-white/10 text-muted"
               }`}
             >
               {prefs.soundOn ? "🔔 Chime on" : "🔕 Chime off"}
@@ -940,7 +940,7 @@ export default function BuyNumber() {
             <button
               onClick={loadActivations}
               title="Reload my active numbers"
-              className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 text-[11px] font-bold transition"
+              className="h-9 px-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-fg-soft text-[11px] font-bold transition"
             >
               Refresh numbers
             </button>
@@ -963,7 +963,7 @@ export default function BuyNumber() {
                 ? `up to PKR ${catalogue.premiumPrice.toFixed(2)}`
                 : "single rate"
             }
-            tone="text-[#8ab9f9]"
+            tone="text-brand-soft"
           />
         </div>
       </section>
@@ -982,15 +982,15 @@ export default function BuyNumber() {
       <section className="mt-6 lg:mt-7">
         <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
           <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
-            <span className="grid place-items-center w-8 h-8 rounded-xl bg-[#1877F2]/15 border border-[#1877F2]/30 text-base">🛡️</span>
+            <span className="grid place-items-center w-8 h-8 rounded-xl bg-brand/15 border border-brand/30 text-base">🛡️</span>
             My Active Numbers
             {liveCounts.total > 0 && (
-              <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+              <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
                 {liveCounts.total}
               </span>
             )}
           </h2>
-          <span className="text-[11px] text-slate-500 flex items-center gap-1.5">
+          <span className="text-[11px] text-muted flex items-center gap-1.5">
             <span className="relative inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 text-emerald-400 live-ping" />
             Auto-checking every 5s
           </span>
@@ -1012,11 +1012,11 @@ export default function BuyNumber() {
             ))}
           </div>
         ) : activationsLoaded ? (
-          <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/60 p-8 text-center">
-            <FacebookLogo size={40} accessible={false} className="rounded-xl mx-auto mb-3 fb-badge-bloom" />
+          <div className="rounded-2xl border border-dashed border-white/10 bg-surface/60 p-8 text-center">
+            <FacebookLogo size={40} accessible={false} className="rounded-xl mx-auto mb-3 brand-badge-bloom" />
             <p className="font-bold text-white">No active numbers right now</p>
-            <p className="text-sm text-slate-500 mt-1 max-w-md mx-auto">
-              Pick a country in the pinned box above and tap <span className="text-slate-300 font-semibold">Buy now</span>. Your number and the
+            <p className="text-sm text-muted mt-1 max-w-md mx-auto">
+              Pick a country in the pinned box above and tap <span className="text-fg-soft font-semibold">Buy now</span>. Your number and the
               incoming Facebook OTP will show up here in real time.
             </p>
           </div>
@@ -1034,24 +1034,24 @@ export default function BuyNumber() {
           <h2 className="text-lg lg:text-xl font-bold text-white flex items-center gap-2.5">
             <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">🌍</span>
             Facebook Numbers by Country
-            {loading && <span className="text-[11px] font-semibold text-slate-500 animate-pulse">syncing…</span>}
+            {loading && <span className="text-[11px] font-semibold text-muted animate-pulse">syncing…</span>}
           </h2>
 
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm pointer-events-none">⌕</span>
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted text-sm pointer-events-none">⌕</span>
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search country…"
-                className="w-44 sm:w-56 bg-slate-900 border border-white/10 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder:text-slate-600 focus:outline-none focus:border-[#1877F2]/60 focus:ring-2 focus:ring-[#1877F2]/20 transition"
+                className="w-44 sm:w-56 bg-surface border border-white/10 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder:text-muted focus:outline-none focus:border-brand/60 focus:ring-2 focus:ring-brand/20 transition"
               />
             </div>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as SortKey)}
               title="Sort countries"
-              className="bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-slate-300 focus:outline-none focus:border-[#1877F2]/60 transition"
+              className="bg-surface border border-white/10 rounded-xl px-3 py-2 text-xs font-semibold text-fg-soft focus:outline-none focus:border-brand/60 transition"
             >
               {(Object.keys(SORT_LABELS) as SortKey[]).map((k) => (
                 <option key={k} value={k}>
@@ -1063,7 +1063,7 @@ export default function BuyNumber() {
               onClick={() => setInStockOnly((v) => !v)}
               aria-pressed={inStockOnly}
               className={`h-[34px] px-3 rounded-xl text-xs font-bold border transition ${
-                inStockOnly ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-slate-900 border-white/10 text-slate-400 hover:text-white"
+                inStockOnly ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" : "bg-surface border-white/10 text-muted hover:text-white"
               }`}
             >
               In stock only
@@ -1093,9 +1093,9 @@ export default function BuyNumber() {
               ))}
             </div>
             {filtered.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-white/10 bg-slate-900/60 p-8 text-center text-sm text-slate-500">
+              <div className="rounded-2xl border border-dashed border-white/10 bg-surface/60 p-8 text-center text-sm text-muted">
                 Nothing matches that filter.
-                <button onClick={() => setQuery("")} className="ml-2 text-[#8ab9f9] font-bold hover:underline">
+                <button onClick={() => setQuery("")} className="ml-2 text-brand-soft font-bold hover:underline">
                   Clear search
                 </button>
               </div>
@@ -1105,14 +1105,14 @@ export default function BuyNumber() {
       </section>
 
       {/* ── Help ── */}
-      <section className="mt-8 lg:mt-10 rounded-2xl border border-white/10 bg-slate-900/70 p-5 lg:p-6">
+      <section className="mt-8 lg:mt-10 rounded-2xl border border-white/10 bg-surface/70 p-5 lg:p-6">
         <details>
           <summary className="cursor-pointer list-none flex items-center justify-between gap-3 [&::-webkit-details-marker]:hidden">
             <span className="font-bold text-white flex items-center gap-2">
               <FacebookLogo size={18} accessible={false} className="rounded-[5px]" />
               How it works
             </span>
-            <span className="text-[11px] text-slate-500 font-semibold">3 steps</span>
+            <span className="text-[11px] text-muted font-semibold">3 steps</span>
           </summary>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
             {[
@@ -1120,17 +1120,17 @@ export default function BuyNumber() {
               { n: 2, t: "Paste it on Facebook", d: "Use it for signup or login. The OTP lands on this page automatically and you hear a chime." },
               { n: 3, t: "No code? Full refund", d: "Cancel inside the free window and the amount goes straight back to your balance." },
             ].map((s) => (
-              <div key={s.n} className="rounded-xl bg-slate-950/50 border border-white/5 p-4">
-                <span className="grid place-items-center w-7 h-7 rounded-lg fb-gradient text-white text-xs font-bold mb-2.5">{s.n}</span>
+              <div key={s.n} className="rounded-xl bg-canvas/50 border border-white/5 p-4">
+                <span className="grid place-items-center w-7 h-7 rounded-lg brand-gradient text-ink text-xs font-bold mb-2.5">{s.n}</span>
                 <p className="font-bold text-white text-sm">{s.t}</p>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{s.d}</p>
+                <p className="text-xs text-muted mt-1 leading-relaxed">{s.d}</p>
               </div>
             ))}
           </div>
         </details>
       </section>
 
-      <p className="mt-6 pb-2 text-[11px] text-slate-600 text-center flex items-center justify-center gap-1.5">
+      <p className="mt-6 pb-2 text-[11px] text-muted/70 text-center flex items-center justify-center gap-1.5">
         <FacebookLogo size={12} accessible={false} className="rounded-[3px] shrink-0" />
         Facebook is a trademark of Meta Platforms, Inc. — shown here only to identify the service being ordered.
       </p>
@@ -1140,10 +1140,10 @@ export default function BuyNumber() {
 
 function StatTile({ label, value, hint, tone = "text-white" }: { label: string; value: string | number; hint?: string; tone?: string }) {
   return (
-    <div className="rounded-xl bg-slate-950/50 border border-white/5 px-3.5 py-3">
-      <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold">{label}</p>
+    <div className="rounded-xl bg-canvas/50 border border-white/5 px-3.5 py-3">
+      <p className="text-[10px] uppercase tracking-widest text-muted font-bold">{label}</p>
       <p className={`text-lg lg:text-xl font-bold tabular-nums ${tone}`}>{value}</p>
-      {hint && <p className="text-[11px] text-slate-500 truncate">{hint}</p>}
+      {hint && <p className="text-[11px] text-muted truncate">{hint}</p>}
     </div>
   );
 }

@@ -100,7 +100,7 @@ export default function AdminDepositAccounts() {
       />
 
       {/* ── Add / edit form ── */}
-      <div className="bg-slate-900/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5">
+      <div className="bg-surface/90 border border-white/10 rounded-2xl shadow-xl p-5 mt-5">
         <h3 className="font-bold text-white text-lg mb-4">{editingId ? `Edit account #${editingId}` : "Add deposit account"}</h3>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           <div>
@@ -128,9 +128,9 @@ export default function AdminDepositAccounts() {
             <input placeholder="e.g. Send from the same number every time" value={form.instructions} onChange={(e) => setForm({ ...form, instructions: e.target.value })} className="input" />
           </div>
           <div className="flex items-end">
-            <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/10 bg-slate-950/70 px-4 py-2.5 w-full">
-              <input id="account-active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 rounded accent-[#1877F2]" />
-              <span className="text-sm text-slate-300 font-semibold">Visible to clients</span>
+            <label className="flex items-center gap-2.5 cursor-pointer select-none rounded-xl border border-white/10 bg-canvas/70 px-4 py-2.5 w-full">
+              <input id="account-active" type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="w-4 h-4 rounded accent-brand" />
+              <span className="text-sm text-fg-soft font-semibold">Visible to clients</span>
             </label>
           </div>
           <div className="flex gap-2 md:col-span-2 xl:col-span-4">
@@ -150,7 +150,7 @@ export default function AdminDepositAccounts() {
           <span className="grid place-items-center w-8 h-8 rounded-xl bg-white/5 border border-white/10 text-base">📒</span>
           Receiving Accounts
           {loaded && (
-            <span className="text-[11px] font-bold bg-[#1877F2]/15 text-[#8ab9f9] border border-[#1877F2]/30 rounded-full px-2 py-0.5 tabular-nums">
+            <span className="text-[11px] font-bold bg-brand/15 text-brand-soft border border-brand/30 rounded-full px-2 py-0.5 tabular-nums">
               {accounts.length}
             </span>
           )}
@@ -185,13 +185,13 @@ export default function AdminDepositAccounts() {
                   </td>
                   <td className="td">{a.accountName}</td>
                   <td className="td font-mono text-emerald-400 font-semibold">{a.accountNumber}</td>
-                  <td className="td text-slate-400 max-w-[220px] truncate">{a.instructions || "-"}</td>
+                  <td className="td text-muted max-w-[220px] truncate">{a.instructions || "-"}</td>
                   <td className="td">
                     <StatusPill status={a.active ? "active" : "inactive"} />
                   </td>
                   <td className="td">
                     <span className="flex items-center gap-1.5">
-                      <button onClick={() => edit(a)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/25 transition">
+                      <button onClick={() => edit(a)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-brand/15 text-muted hover:text-brand border border-white/10 hover:border-brand/30 transition">
                         Edit
                       </button>
                       <button onClick={() => remove(a.id)} className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-300 border border-red-500/25 transition">
