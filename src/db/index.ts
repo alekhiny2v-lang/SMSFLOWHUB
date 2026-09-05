@@ -2,118 +2,25 @@ import { MongoClient, Db } from "mongodb";
 import type { Table } from "./schema";
 import type { Column, Predicate, Sort } from "./query";
 
-/**
- * Fail fast instead of hanging.
- *
- * The driver defaults to a 30s server-selection window, which is longer than
- * the 10s execution limit most serverless hosts impose: an unreachable cluster
- * (wrong URI, Atlas IP allowlist, paused cluster) made every request run until
- * the platform killed it, which surfaced as the generic "A server error
- * occurred" page. 8s leaves room to answer with a real error message.
- */
-const SERVER_SELECTION_TIMEOUT_MS = 8_000;
-const CONNECT_TIMEOUT_MS = 10_000;
-
-/**
- * How long to keep failing fast after a connection failure.
- *
- * Pages such as the admin dashboard run several queries; without this, a dead
- * cluster made each of them burn the full 8s timeout and the request blew past
- * the serverless execution limit anyway. After one failure we answer instantly
- * with the cached error for a few seconds, then try again.
- */
-const FAILURE_COOLDOWN_MS = 5_000;
+const configuredUri = process.env.MONGODB_URI;
 
 const globalForMongo = globalThis as typeof globalThis & {
   __smsflowMongoClient?: MongoClient;
   __smsflowMongoDb?: Db;
-  __smsflowMongoFailure?: { at: number; message: string };
 };
 let client = globalForMongo.__smsflowMongoClient;
 let dbPromise: Promise<Db> | undefined;
-let lastFailure = globalForMongo.__smsflowMongoFailure;
-
-/** Drop the cached client/promise so the next request reconnects from scratch. */
-async function resetConnection() {
-  dbPromise = undefined;
-  globalForMongo.__smsflowMongoDb = undefined;
-  const stale = client;
-  client = undefined;
-  globalForMongo.__smsflowMongoClient = undefined;
-  if (stale) {
-    try {
-      await stale.close(true);
-    } catch {
-      // The client was already broken — nothing to clean up.
-    }
-  }
-}
-
 async function getDb() {
-  if (dbPromise) return dbPromise;
-
-  // Circuit breaker: report the known-bad state immediately instead of paying
-  // the full connect timeout on every query of the request.
-  if (lastFailure && Date.now() - lastFailure.at < FAILURE_COOLDOWN_MS) {
-    throw new Error(lastFailure.message);
+  if (!dbPromise) {
+    if (!configuredUri) throw new Error("MONGODB_URI is required");
+    client = client ?? new MongoClient(configuredUri);
+    globalForMongo.__smsflowMongoClient = client;
+    dbPromise = client.connect().then((connection) => {
+      const databaseName = process.env.MONGODB_DB || new URL(configuredUri).pathname.slice(1) || "smsflow";
+      return connection.db(databaseName);
+    });
   }
-
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    throw new Error("MONGODB_URI is not configured. Add it to your deployment environment variables and redeploy.");
-  }
-
-  client = client ?? new MongoClient(uri, {
-    serverSelectionTimeoutMS: SERVER_SELECTION_TIMEOUT_MS,
-    connectTimeoutMS: CONNECT_TIMEOUT_MS,
-  });
-  globalForMongo.__smsflowMongoClient = client;
-
-  dbPromise = client.connect().then((connection) => {
-    let databaseName = process.env.MONGODB_DB;
-    if (!databaseName) {
-      try {
-        databaseName = new URL(uri).pathname.slice(1);
-      } catch {
-        databaseName = "";
-      }
-    }
-    const database = connection.db(databaseName || "smsflow");
-    globalForMongo.__smsflowMongoDb = database;
-    return database;
-  });
-
-  // A rejected promise used to be cached forever, so one transient failure
-  // (cold start, network blip, Atlas maintenance) permanently broke every
-  // route for the lifetime of the process. Remember the failure, drop the
-  // client, and retry from scratch on the next request.
-  dbPromise.catch((error: unknown) => {
-    lastFailure = { at: Date.now(), message: (error as Error)?.message || "Database connection failed" };
-    globalForMongo.__smsflowMongoFailure = lastFailure;
-    void resetConnection();
-  });
-
-  // Clear the breaker once we know the cluster answers again.
-  dbPromise.then(() => {
-    lastFailure = undefined;
-    globalForMongo.__smsflowMongoFailure = undefined;
-  }).catch(() => undefined);
-
   return dbPromise;
-}
-
-/**
- * Lightweight connectivity check used by `/api/health`. Returns null when the
- * database answers, or the reason it does not.
- */
-export async function checkDbHealth(): Promise<{ ok: true } | { ok: false; error: string }> {
-  try {
-    const database = await getDb();
-    await database.command({ ping: 1 });
-    return { ok: true };
-  } catch (error) {
-    return { ok: false, error: (error as Error).message };
-  }
 }
 
 /**
