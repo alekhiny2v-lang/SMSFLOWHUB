@@ -5,12 +5,14 @@ import { AdminLayout } from "@/components/AdminLayout";
 import { TableCard } from "@/components/TableCard";
 import { EmptyState, PageHero, StatCard, StatCardSkeleton, StatusPill, TableSkeleton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
-import { getCountryFlagByName } from "@/lib/country";
+import { getCountryFlag } from "@/lib/country";
 
 interface Activation {
   id: number;
   username: string;
   countryName: string;
+  countryCode?: string;
+  flag?: string;
   service: string;
   phoneNumber: string;
   salePrice: string;
@@ -119,7 +121,7 @@ export default function AdminHistory() {
                   <td className="td font-semibold text-white">{a.username}</td>
                   <td className="td">
                     <span className="flex items-center gap-2.5">
-                      <span className="text-xl leading-none">{getCountryFlagByName(a.countryName)}</span>
+                      <span className="text-xl leading-none">{a.flag || getCountryFlag(a.countryCode || a.countryName)}</span>
                       <span className="font-medium">{a.countryName || "-"}</span>
                     </span>
                   </td>

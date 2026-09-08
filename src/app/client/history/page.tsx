@@ -5,11 +5,13 @@ import { ClientLayout } from "@/components/ClientLayout";
 import { TableCard } from "@/components/TableCard";
 import { EmptyState, PageHero, StatCard, StatCardSkeleton, StatusPill, TableSkeleton } from "@/components/ui";
 import { apiFetch } from "@/lib/api";
-import { getCountryFlagByName } from "@/lib/country";
+import { getCountryFlag } from "@/lib/country";
 
 interface Activation {
   id: number;
   countryName: string;
+  countryCode?: string;
+  flag?: string;
   phoneNumber: string;
   cost: string;
   status: string;
@@ -152,7 +154,7 @@ export default function ClientHistory() {
                 <tr key={a.id} className="tr-hover">
                   <td className="td">
                     <span className="flex items-center gap-2.5">
-                      <span className="text-xl leading-none">{getCountryFlagByName(a.countryName)}</span>
+                      <span className="text-xl leading-none">{a.flag || getCountryFlag(a.countryCode || a.countryName)}</span>
                       <span className="font-semibold text-white">{a.countryName || "-"}</span>
                     </span>
                   </td>

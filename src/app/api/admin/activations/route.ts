@@ -3,6 +3,7 @@ import { eq, desc } from "@/db/query";
 import { db } from "@/db";
 import { activations, users, countries } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
+import { getCountryFlag } from "@/lib/country";
 
 export async function GET(req: NextRequest) {
   try {
@@ -42,7 +43,9 @@ export async function GET(req: NextRequest) {
     }
 
     const rows = await query;
-    return NextResponse.json(rows);
+    return NextResponse.json(
+      rows.map((row) => ({ ...row, flag: getCountryFlag(row.countryCode || row.countryName) })),
+    );
   } catch (err) {
     return NextResponse.json({ error: (err as Error).message }, { status: 401 });
   }
