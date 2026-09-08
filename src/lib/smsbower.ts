@@ -1,4 +1,5 @@
-const BASE_URL = "https://smsbower.page/stubs/handler_api.php";
+/** Overridable so staging setups (and tests) can point at another endpoint. */
+const BASE_URL = process.env.SMSBOWER_BASE_URL || "https://smsbower.page/stubs/handler_api.php";
 
 function getApiKey(): string {
   const key = process.env.SMSBOWER_API_KEY;

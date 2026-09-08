@@ -106,6 +106,76 @@ Notes on what the app does to stay up:
 - A failed connection is never cached permanently: the driver retries after a
   short 5s cooldown, so a blip heals itself without a redeploy.
 
+## Stock, flags and pricing (admin → Countries & stock)
+
+Admin → **Countries & stock** has three tabs.
+
+### 1. Countries
+
+The catalogue. Type any country name — the ISO code and the flag emoji are
+resolved automatically (`src/lib/country.ts` builds its index from the
+platform's own `Intl.DisplayNames` region data, so "Pakistan", "pk", "PAK" and
+"Islamic Republic of Pakistan" all work, and every screen — catalogue, buy
+cards, activation numbers, history — shows the same flag).
+
+### 2. Provider rates — one tab per country
+
+Pick a country along the top and you get **one row per provider id** with:
+
+| Column | Meaning |
+| --- | --- |
+| Live stock | real numbers that provider has on the shelf, fetched from SMSBOWER |
+| Cost (USD / PKR) | what the provider charges, converted at the USD→PKR rate |
+| Profit (PKR) | flat profit kept on that provider (defaults to the panel-wide value) |
+| Selling (PKR) | what the client pays — auto = cost + profit, or a fixed override |
+| Use | untick to stop buying from that provider |
+
+"Refresh live stock" re-pulls every provider id for the country; "Save all"
+writes the whole card. Clients are always served the cheapest provider that
+actually has stock.
+
+### 3. Stock fetch — cheapest live rates
+
+Set a max provider price (and optionally a minimum stock), hit **Fetch live
+stock**, and every country under that price is listed with each provider's id,
+price and real stock. Each row has:
+
+- **＋ Add** — creates the country with that SMSBOWER id and all of its
+  providers (or merges the providers into the country if it already exists).
+- **＋** on a provider chip — adds/merge just that one provider id.
+- **＋ Add all visible** — bulk-import everything on screen.
+
+### Profit rule
+
+Every number is sold at:
+
+```
+selling PKR = provider cost (USD) × USD→PKR + profit (PKR)
+```
+
+The profit is a **flat 6–7 PKR per number**, not a percentage — a percentage
+makes cheap numbers unsellable and expensive ones overpriced. Set the default
+in the green strip on the Countries page (saved to the `settings` collection),
+override it per country, and override it again per provider id. The price is
+rounded **up** to the next whole rupee so the margin is never undershot.
+
+Priority: user's custom rate → country fixed price → per-provider card →
+country profit → panel default (falling back to the legacy `markupPercent`
+only for countries that never got a flat profit).
+
+### New API routes
+
+| Route | Purpose |
+| --- | --- |
+| `GET/PUT /api/admin/settings` | USD→PKR rate + default profit per number |
+| `GET /api/admin/smsbower/stock?smsbowerCountryId=…` | live per-provider price/stock for one country |
+| `GET /api/admin/smsbower/cheap?maxPrice=…&minCount=…` | cheapest countries, with names, flags and per-provider rows |
+| `GET/POST/DELETE /api/admin/provider-rates` | per-country provider rate cards |
+| `PUT/DELETE /api/admin/provider-rates/[id]` | single card |
+
+`SMSBOWER_BASE_URL` can override the provider endpoint (defaults to
+`https://smsbower.page/stubs/handler_api.php`).
+
 ## Scripts
 
 | Command | Description |

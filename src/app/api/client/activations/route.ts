@@ -3,6 +3,7 @@ import { eq, desc } from "@/db/query";
 import { db } from "@/db";
 import { activations, countries } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
+import { getCountryFlag } from "@/lib/country";
 
 const TIMEOUT_MINUTES = 20;
 
@@ -35,7 +36,8 @@ export async function GET() {
       const canCancel = a.status === "pending" && !a.smsCode;
       const elapsed = Date.now() - new Date(a.createdAt).getTime();
       const timeRemainingMs = canCancel ? Math.max(0, TIMEOUT_MINUTES * 60 * 1000 - elapsed) : 0;
-      return { ...a, canCancel, timeRemainingMs };
+      // Flag resolved from the stored country code, or the name for legacy rows.
+      return { ...a, canCancel, timeRemainingMs, flag: getCountryFlag(a.countryCode || a.countryName) };
     });
 
     return NextResponse.json(enriched);

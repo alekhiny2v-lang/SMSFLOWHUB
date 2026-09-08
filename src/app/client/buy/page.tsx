@@ -5,14 +5,32 @@ import Link from "next/link";
 import { ClientLayout } from "@/components/ClientLayout";
 import { FacebookChip, FacebookLogo } from "@/components/FacebookLogo";
 import { apiFetch } from "@/lib/api";
-import { getCountryFlagByName } from "@/lib/country";
+import { getCountryFlag } from "@/lib/country";
+
+/** Server sends the resolved flag; fall back to resolving the name locally. */
+function flagOf(flag?: string | null, code?: string | null, name?: string | null) {
+  return flag || getCountryFlag(code || name);
+}
+
+interface ProviderStock {
+  providerId: number;
+  usdPrice: number;
+  count: number;
+  costPkr: number;
+  pkrPrice: number | null;
+}
 
 interface Price {
   id: number;
   name: string;
   code: string;
+  /** Flag emoji resolved on the server from the country code/name. */
+  flag?: string;
   pkrPrice: number;
   count: number | null;
+  /** Live per-provider stock, straight from SMSBOWER. */
+  providers?: ProviderStock[];
+  bestProviderId?: number | null;
   isCustomRate?: boolean;
   isFixedRate?: boolean;
 }
@@ -21,6 +39,7 @@ interface Activation {
   id: number;
   countryName: string;
   countryCode: string;
+  flag?: string;
   phoneNumber: string;
   cost: string;
   /** PKR charged. The per-id poll endpoint returns the USD cost in `cost`,
@@ -179,7 +198,7 @@ const ActivationCard = memo(function ActivationCard({
 
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3 min-w-0">
-          <span className="text-3xl leading-none shrink-0">{getCountryFlagByName(a.countryName)}</span>
+          <span className="text-3xl leading-none shrink-0">{flagOf(a.flag, a.countryCode, a.countryName)}</span>
           <div className="min-w-0">
             <p className="font-bold text-white text-base truncate">{a.countryName || "Unknown"}</p>
             <p className="text-muted text-[11px] uppercase tracking-wider font-semibold">
@@ -304,7 +323,7 @@ const CountryCard = memo(function CountryCard({
       }`}
     >
       <div className="flex items-start gap-3 mb-4">
-        <span className="text-3xl leading-none mt-0.5 shrink-0">{getCountryFlagByName(p.name)}</span>
+        <span className="text-3xl leading-none mt-0.5 shrink-0">{flagOf(p.flag, p.code, p.name)}</span>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-white text-base truncate">{p.name}</h3>
@@ -327,7 +346,14 @@ const CountryCard = memo(function CountryCard({
         </div>
         <div className="text-right">
           <p className="text-[11px] text-muted uppercase tracking-wider font-semibold mb-0.5">In stock</p>
-          <p className={`text-lg font-bold tabular-nums ${outOfStock ? "text-red-400" : p.isCustomRate ? "text-brand-soft" : "text-emerald-400"}`}>
+          <p
+            title={
+              p.providers?.length
+                ? `Live per provider — ${p.providers.map((q) => `#${q.providerId}: ${q.count}`).join(" · ")}`
+                : undefined
+            }
+            className={`text-lg font-bold tabular-nums ${outOfStock ? "text-red-400" : p.isCustomRate ? "text-brand-soft" : "text-emerald-400"}`}
+          >
             {outOfStock ? "None" : p.count}
           </p>
         </div>
@@ -469,7 +495,7 @@ function PinnedBuyBox({
               title="Change country"
               className="flex-1 min-w-0 flex items-center gap-2 lg:gap-2.5 bg-canvas/70 hover:bg-canvas border border-white/10 hover:border-brand/45 rounded-xl px-2.5 lg:px-3 py-2 text-left transition"
             >
-              <span className="text-lg lg:text-xl leading-none shrink-0">{selected ? getCountryFlagByName(selected.name) : "🌍"}</span>
+              <span className="text-lg lg:text-xl leading-none shrink-0">{selected ? flagOf(selected.flag, selected.code, selected.name) : "🌍"}</span>
               <span className="flex-1 min-w-0">
                 <span className="hidden sm:block text-[10px] uppercase tracking-widest text-muted font-bold leading-tight">Country</span>
                 <span className="block text-[13px] lg:text-sm font-bold text-white truncate leading-snug">
@@ -567,7 +593,7 @@ function PinnedBuyBox({
                   return (
                     <div key={p.id} className={`flex items-center gap-3 px-3 py-2.5 transition ${isActive ? "bg-brand/10" : "hover:bg-white/5"}`}>
                       <button onClick={() => onSelectFromPanel(p.id)} className="flex items-center gap-3 flex-1 min-w-0 text-left" title="Use this country in the buy box">
-                        <span className="text-xl leading-none shrink-0">{getCountryFlagByName(p.name)}</span>
+                        <span className="text-xl leading-none shrink-0">{flagOf(p.flag, p.code, p.name)}</span>
                         <span className="min-w-0 flex-1">
                           <span className="block text-sm font-semibold text-white truncate">
                             {p.name}

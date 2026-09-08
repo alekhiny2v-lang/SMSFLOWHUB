@@ -8,11 +8,13 @@ import { EmptyState, PageHero, StatCard, StatCardSkeleton, StatusPill, TableSkel
 import { FacebookLogo } from "@/components/FacebookLogo";
 import { SMSFlowLogo } from "@/components/SMSFlowLogo";
 import { apiFetch } from "@/lib/api";
-import { getCountryFlagByName } from "@/lib/country";
+import { getCountryFlag } from "@/lib/country";
 
 interface Activation {
   id: number;
   countryName: string;
+  countryCode?: string;
+  flag?: string;
   phoneNumber: string;
   status: string;
   createdAt: string;
@@ -109,7 +111,7 @@ export default function ClientDashboard() {
                 <tr key={a.id} className="tr-hover">
                   <td className="td">
                     <span className="flex items-center gap-2.5">
-                      <span className="text-xl leading-none">{getCountryFlagByName(a.countryName)}</span>
+                      <span className="text-xl leading-none">{a.flag || getCountryFlag(a.countryCode || a.countryName)}</span>
                       <span className="font-semibold text-white">{a.countryName || "-"}</span>
                     </span>
                   </td>
