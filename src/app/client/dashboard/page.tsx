@@ -24,6 +24,7 @@ export default function ClientDashboard() {
   const [activations, setActivations] = useState<Activation[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [me, setMe] = useState<{ username: string; balance: string } | null>(null);
+  const [proxyCount, setProxyCount] = useState<number | null>(null);
 
   useEffect(() => {
     apiFetch<Activation[]>("/api/client/activations")
@@ -33,6 +34,9 @@ export default function ClientDashboard() {
     apiFetch<{ username: string; balance: string }>("/api/auth/me")
       .then(setMe)
       .catch(() => {});
+    apiFetch<{ id: number }[]>("/api/client/proxies/purchases")
+      .then((rows) => setProxyCount(rows.length))
+      .catch(() => setProxyCount(0));
   }, []);
 
   const pending = activations.filter((a) => a.status === "pending").length;
@@ -51,21 +55,31 @@ export default function ClientDashboard() {
           <FacebookLogo size={14} variant="glyph" accessible={false} />
           Buy a number
         </Link>
+        <Link href="/client/proxies" className="btn-ghost">
+          🛡️ Buy proxy
+        </Link>
         <Link href="/client/deposits" className="btn-ghost">
           + Add funds
         </Link>
       </PageHero>
 
       {/* ── Stats ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mt-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 mt-5">
         {me === null && !loaded ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
             <StatCard label="Wallet balance" value={me ? `PKR ${Number(me.balance).toFixed(2)}` : "—"} hint="available to spend" icon="💰" tone="emerald" />
             <StatCard label="My numbers" value={activations.length} hint="all-time purchases" icon="📱" tone="brand" />
             <StatCard label="Awaiting SMS" value={pending} hint="auto-checking every 5s" icon="⏳" tone="info" />
             <StatCard label="Codes received" value={completed} hint="ready to paste" icon="✅" tone="white" />
+            <StatCard
+              label="My proxies"
+              value={proxyCount === null ? "—" : proxyCount}
+              hint="proxy accounts bought"
+              icon="🛡️"
+              tone="brand"
+            />
           </>
         )}
       </div>

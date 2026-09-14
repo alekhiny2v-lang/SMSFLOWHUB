@@ -17,3 +17,19 @@ export const countryProviderRates = table("country_provider_rates", ["id", "coun
 export const userCountryRates = table("user_country_rates", ["id", "userId", "countryId", "pkrPrice", "createdAt", "updatedAt"]);
 export const paymentMethods = table("payment_methods", ["id", "userId", "type", "accountName", "accountNumber", "notes", "isDefault", "createdAt", "updatedAt"]);
 export const depositAccounts = table("deposit_accounts", ["id", "type", "accountName", "accountNumber", "instructions", "active", "sortOrder", "createdAt", "updatedAt"]);
+
+// Proxy store: admin-stocked proxy accounts (host:port:user:pass) sold to
+// clients at a fixed PKR price. Each row is one package of `stock` identical
+// credentials; a purchase atomically decrements stock and is non-refundable.
+export const proxies = table("proxies", [
+  "id", "host", "port", "username", "password", "country", "trafficGb",
+  "stock", "sold", "pricePkr", "active", "notes", "createdAt", "updatedAt",
+]);
+
+// One row per proxy a client bought. The credentials and listing details are
+// snapshotted at purchase time so the client keeps their copy even if the
+// admin later edits or deletes the proxy package.
+export const proxyPurchases = table("proxy_purchases", [
+  "id", "userId", "proxyId", "host", "port", "country", "trafficGb",
+  "credentials", "pricePkr", "status", "createdAt", "updatedAt",
+]);
