@@ -49,7 +49,11 @@ async function resetConnection() {
   }
 }
 
-async function getDb() {
+/**
+ * Raw database handle. Used by routes that need operations the mini query
+ * builder cannot express atomically (e.g. the proxy stock decrement below).
+ */
+export async function getDb() {
   if (dbPromise) return dbPromise;
 
   // Circuit breaker: report the known-bad state immediately instead of paying

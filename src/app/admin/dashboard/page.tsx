@@ -9,6 +9,7 @@ interface DashboardData {
   users: { count: number; totalBalance: string };
   transactions: { total: string };
   activations: { count: number; pending: number; completed: number; cancelled: number };
+  proxies: { packages: number; stock: number; sold: number; revenue: number };
 }
 
 export default function AdminDashboard() {
@@ -38,9 +39,9 @@ export default function AdminDashboard() {
       </PageHero>
 
       {/* ── Key figures ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-5 mt-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 lg:gap-5 mt-5">
         {!data && !balance ? (
-          Array.from({ length: 4 }).map((_, i) => <StatCardSkeleton key={i} />)
+          Array.from({ length: 5 }).map((_, i) => <StatCardSkeleton key={i} />)
         ) : (
           <>
             <StatCard label="Total users" value={data?.users?.count ?? "-"} hint="registered accounts" icon="👥" tone="brand" />
@@ -57,6 +58,13 @@ export default function AdminDashboard() {
               hint="all-time"
               icon="📈"
               tone="white"
+            />
+            <StatCard
+              label="Proxy stock"
+              value={data?.proxies?.stock ?? "-"}
+              hint={data?.proxies ? `${data.proxies.sold} sold · PKR ${data.proxies.revenue.toFixed(0)} revenue` : "proxy accounts in hand"}
+              icon="🛡️"
+              tone="info"
             />
             <StatCard
               label="SMSBOWER balance"

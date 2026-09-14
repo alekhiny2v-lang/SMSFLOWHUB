@@ -27,6 +27,7 @@ const adminNav: NavItem[] = [
   { label: "Users", href: "/admin/users", icon: "👥" },
   { label: "Countries", href: "/admin/countries", icon: "🌍" },
   { label: "Deposit Accounts", href: "/admin/deposit-accounts", icon: "🏦" },
+  { label: "Proxies", href: "/admin/proxies", icon: "🛡️" },
   { label: "Deposits", href: "/admin/deposits", icon: "💰" },
   { label: "History", href: "/admin/history", icon: "📜" },
   { label: "Profile", href: "/admin/profile", icon: "⚙️" },
@@ -35,6 +36,7 @@ const adminNav: NavItem[] = [
 const clientNav: NavItem[] = [
   { label: "Dashboard", href: "/client/dashboard", icon: "📊" },
   { label: "Buy FB Number", href: "/client/buy", icon: "🛒", brand: "facebook" },
+  { label: "Buy Proxies", href: "/client/proxies", icon: "🛡️" },
   { label: "History", href: "/client/history", icon: "📜" },
   { label: "Deposits", href: "/client/deposits", icon: "💰" },
   { label: "Profile", href: "/client/profile", icon: "⚙️" },

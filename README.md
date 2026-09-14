@@ -176,6 +176,53 @@ only for countries that never got a flat profit).
 `SMSBOWER_BASE_URL` can override the provider endpoint (defaults to
 `https://smsbower.page/stubs/handler_api.php`).
 
+## Proxy store (admin → Proxies)
+
+A second product line next to the FB numbers: sell pre-stocked proxy accounts
+at a flat price per account.
+
+### Admin → Proxies
+
+- **Add proxy** — one form with host, port, username, password, country/zone,
+  traffic (amount + MB/GB), stock count, price (PKR, defaults to **150**) and
+  visibility. Credentials are stored as `host:port:username:password`, e.g.
+  `change4.owlproxy.com:7778:jatM3rAajT70_custom_zone_US_st__city_sid_77770203_time_90:5536244`.
+- **Bulk add** — paste one `host:port:username:password` per line; every line
+  is stocked with the form's current country, traffic, stock, price and
+  visibility.
+- The stock table shows masked passwords (Show/Copy), traffic, stock/sold
+  counters and revenue, and supports edit/delete. Deleting a package does not
+  remove what clients already bought.
+
+### Client → Buy Proxies
+
+- The store lists every active package with traffic, price and live stock —
+  never the credentials themselves.
+- **Buy** opens a confirm dialog with the exact charge and an explicit
+  **non-refundable** notice. On payment the wallet is debited, one unit of
+  stock is consumed atomically (two clients can never grab the same last
+  unit), and the full credentials are shown immediately, with a copy button.
+- **My proxies** keeps every purchase: date, endpoint, traffic, price and a
+  copyable credentials line — the client can come back for it any time.
+
+Sales are final by design (a shown secret cannot be returned): there is no
+refund flow, and a failed attempt (insufficient balance / sold out) never
+touches stock or balance. Every sale is logged in `transactions` as
+`proxy_purchase` and the admin dashboard tracks proxy packages, stock, sales
+and revenue (deposit totals are unaffected).
+
+### Data & API routes
+
+Collections: `proxies` (the stocked packages) and `proxy_purchases` (one
+snapshot per sale, so client copies survive later edits/deletes).
+
+| Route | Purpose |
+| --- | --- |
+| `GET/POST /api/admin/proxies`, `PUT/DELETE /api/admin/proxies/[id]` | stock management |
+| `GET /api/client/proxies` | catalog (no credentials) |
+| `POST /api/client/proxies/buy` | buy one unit → charges wallet, returns credentials |
+| `GET /api/client/proxies/purchases` | the client's own purchases |
+
 ## Scripts
 
 | Command | Description |
