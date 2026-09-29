@@ -53,41 +53,78 @@ type ServiceEntry = { provider_id?: number; count?: number; price?: number };
 /** `getCountries()` → id → { code, english name }. */
 export type CountryDirectory = Map<number, { code: string; name: string }>;
 
-export async function loadCountryDirectory(): Promise<CountryDirectory> {
-  const directory: CountryDirectory = new Map();
-  try {
-    const raw = (await getCountries()) as Record<string, { id?: number; eng?: string }> | { error?: string };
-    if (raw && typeof raw === "object" && !("error" in raw)) {
-      for (const [code, data] of Object.entries(raw as Record<string, { id?: number; eng?: string }>)) {
-        if (!data || typeof data !== "object") continue;
-        const id = Number(data.id);
-        if (!Number.isFinite(id)) continue;
-        directory.set(id, { code: String(code).toLowerCase(), name: String(data.eng || code) });
+export type ProviderSnapshot = Map<number, Record<string, Record<string, ServiceEntry>>>;
+
+/**
+ * Both catalogue reads are memoised for a few seconds.
+ *
+ * Every client refreshes the price board on a timer, and each buy used to fire
+ * its own `getPricesV3` + `getCountries`. Hammering the aggregator gets us rate
+ * limited (`TOO_MANY_ATTEMPTS`), which then reads as "out of stock" to the
+ * buyer. A few seconds of reuse costs nothing (the aggregator caches its own
+ * stock counters for longer than that) and keeps one board refresh from
+ * stampeding the API.
+ */
+const SNAPSHOT_TTL_MS = 10_000;
+const DIRECTORY_TTL_MS = 10 * 60_000;
+
+type CacheEntry<T> = { at: number; promise: Promise<T> };
+
+function memoize<T>(store: Map<string, CacheEntry<T>>, key: string, ttlMs: number, load: () => Promise<T>): Promise<T> {
+  const cached = store.get(key);
+  if (cached && Date.now() - cached.at < ttlMs) return cached.promise;
+
+  const entry: CacheEntry<T> = { at: Date.now(), promise: load() };
+  store.set(key, entry);
+  // Never cache a failure — the next caller should retry against the API.
+  entry.promise.catch(() => {
+    if (store.get(key) === entry) store.delete(key);
+  });
+  return entry.promise;
+}
+
+const directoryCache = new Map<string, CacheEntry<CountryDirectory>>();
+const snapshotCache = new Map<string, CacheEntry<ProviderSnapshot>>();
+
+export function loadCountryDirectory(): Promise<CountryDirectory> {
+  return memoize(directoryCache, "all", DIRECTORY_TTL_MS, async () => {
+    const directory: CountryDirectory = new Map();
+    try {
+      const raw = (await getCountries()) as Record<string, { id?: number; eng?: string }> | { error?: string };
+      if (raw && typeof raw === "object" && !("error" in raw)) {
+        for (const [code, data] of Object.entries(raw as Record<string, { id?: number; eng?: string }>)) {
+          if (!data || typeof data !== "object") continue;
+          const id = Number(data.id);
+          if (!Number.isFinite(id)) continue;
+          directory.set(id, { code: String(code).toLowerCase(), name: String(data.eng || code) });
+        }
       }
+    } catch {
+      // Catalogue unavailable — names/flags fall back to whatever the row holds.
     }
-  } catch {
-    // Catalogue unavailable — names/flags fall back to whatever the row holds.
-  }
-  return directory;
+    return directory;
+  });
 }
 
 /** Live price + stock for one service, keyed by SMSBOWER country id. */
-export async function loadProviderSnapshot(
-  service: string,
-): Promise<Map<number, Record<string, Record<string, ServiceEntry>>>> {
-  const raw = (await getPricesV3(service)) as
-    | Record<string, Record<string, Record<string, ServiceEntry>>>
-    | { error?: string };
+export function loadProviderSnapshot(service: string, force = false): Promise<ProviderSnapshot> {
+  return memoize(snapshotCache, service, force ? 0 : SNAPSHOT_TTL_MS, async () => {
+    const raw = (await getPricesV3(service)) as
+      | Record<string, Record<string, Record<string, ServiceEntry>>>
+      | { error?: string };
 
-  const snapshot = new Map<number, Record<string, Record<string, ServiceEntry>>>();
-  if (raw && typeof raw === "object" && !("error" in raw)) {
-    for (const [countryKey, services] of Object.entries(raw as Record<string, Record<string, Record<string, ServiceEntry>>>)) {
-      const id = Number(countryKey);
-      if (!Number.isFinite(id) || !services || typeof services !== "object") continue;
-      snapshot.set(id, services);
+    const snapshot: ProviderSnapshot = new Map();
+    if (raw && typeof raw === "object" && !("error" in raw)) {
+      for (const [countryKey, services] of Object.entries(
+        raw as Record<string, Record<string, Record<string, ServiceEntry>>>,
+      )) {
+        const id = Number(countryKey);
+        if (!Number.isFinite(id) || !services || typeof services !== "object") continue;
+        snapshot.set(id, services);
+      }
     }
-  }
-  return snapshot;
+    return snapshot;
+  });
 }
 
 function quoteFrom(
@@ -186,6 +223,35 @@ export function parseProviderIds(value?: string | null): number[] {
 
 export function formatProviderIds(ids: Array<number | string>): string {
   return [...new Set(ids.map((id) => Number(id)).filter((n) => Number.isFinite(n)))].join(",");
+}
+
+/**
+ * A listing can only be sold when the price the client pays still covers the
+ * provider's cost.
+ *
+ * Selling below cost is rejected by the aggregator (`NO_NUMBERS` /
+ * `WRONG_MAX_PRICE`), which the client reads as "out of stock" while the price
+ * board happily shows the stock. The board and the buy route therefore hold
+ * every listing to this same rule.
+ */
+export function isSellable(quote: { costPkr: number }, salePkr: number | null | undefined): boolean {
+  const price = Number(salePkr);
+  return Number.isFinite(price) && price > 0 && Number(quote.costPkr) <= price;
+}
+
+/**
+ * Providers we can actually order from on this country, cheapest first.
+ *
+ * A country's stock is the sum over its providers, but an order is placed
+ * against one provider at a time — so this is the candidate list the buyer
+ * walks down when a provider turns out to be empty.
+ */
+export function inStockQuotes(stock: CountryStock | null, configured: number[] = []): ProviderQuote[] {
+  if (!stock) return [];
+  return stock.providers
+    .filter((quote) => (configured.length ? configured.includes(quote.providerId) : true))
+    .filter((quote) => quote.count > 0)
+    .sort((a, b) => a.usdPrice - b.usdPrice);
 }
 
 /** Everything a stock screen needs in one round-trip. */
