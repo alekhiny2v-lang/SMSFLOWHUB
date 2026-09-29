@@ -94,6 +94,78 @@ export async function getNumberV2(options: {
   }
 }
 
+/**
+ * Why a number order failed.
+ *
+ * `NO_NUMBERS` does **not** mean "this country has no numbers": the API answers
+ * it whenever nothing matches the *parameters* we sent — and the parameter that
+ * usually fails is `maxPrice`. A stale price list (the board is a snapshot), a
+ * provider whose real price ticked up, or a selling rate that no longer covers
+ * the provider cost all come back as `NO_NUMBERS`, which is exactly the "stock
+ * is available but you say out of stock" complaint. `WRONG_MAX_PRICE:<min>` is
+ * the explicit version of the same thing and carries the cheapest price the
+ * provider will actually accept.
+ */
+export type NumberFailureKind =
+  | "no_numbers"
+  | "wrong_max_price"
+  | "no_balance"
+  | "too_many_attempts"
+  | "too_many_active_orders"
+  | "service_unavailable"
+  | "other";
+
+export type NumberFailure = {
+  kind: NumberFailureKind;
+  /** Cheapest price the provider accepts, when the API reports one (account currency). */
+  minPrice: number | null;
+  /** Raw API text — kept for logs/diagnostics. */
+  raw: string;
+};
+
+const WRONG_MAX_PRICE_RE = /WRONG_MAX_PRICE\s*[:=]?\s*([0-9]+(?:\.[0-9]+)?)/i;
+
+/** Normalise any error shape (string, or a JSON envelope) to plain text. */
+export function rawErrorMessage(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  let text = typeof value === "string" ? value : JSON.stringify(value);
+  text = String(text).trim();
+  // Some endpoints answer with `{"error":"NO_NUMBERS"}` instead of plain text.
+  if (text.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(text) as { error?: unknown; message?: unknown };
+      const inner = parsed?.error ?? parsed?.message;
+      if (typeof inner === "string") return inner.trim();
+    } catch {
+      // plain text that merely starts with a brace — keep it as-is
+    }
+  }
+  return text;
+}
+
+export function classifyNumberFailure(value: unknown): NumberFailure {
+  const raw = rawErrorMessage(value);
+  const upper = raw.toUpperCase();
+
+  if (upper.includes("WRONG_MAX_PRICE")) {
+    const match = raw.match(WRONG_MAX_PRICE_RE);
+    const minPrice = match ? Number(match[1]) : NaN;
+    return { kind: "wrong_max_price", minPrice: Number.isFinite(minPrice) ? minPrice : null, raw };
+  }
+  if (/NO_NUMBERS|NO_NUMBER_AVAILABLE/.test(upper)) return { kind: "no_numbers", minPrice: null, raw };
+  if (/TOO_MANY_ATTEMPTS/.test(upper)) return { kind: "too_many_attempts", minPrice: null, raw };
+  if (/TOO_MANY_ACTIVE_ORDERS|TOO_MANY_ORDERS/.test(upper)) return { kind: "too_many_active_orders", minPrice: null, raw };
+  if (/NO_BALANCE|NO_MONEY|NOT_ENOUGH|LOW_BALANCE/i.test(raw)) return { kind: "no_balance", minPrice: null, raw };
+  if (
+    /BAD_KEY|BAD_ACTION|BAD_SERVICE|WRONG_SERVICE|BAD_COUNTRY|BAD_STATUS|BANNED|PROHIBITED|SERVICE_UNAVAILABLE|UNAVAILABLE_REGION/.test(
+      upper,
+    )
+  ) {
+    return { kind: "service_unavailable", minPrice: null, raw };
+  }
+  return { kind: "other", minPrice: null, raw };
+}
+
 export async function getStatus(id: string | number) {
   return fetchApi({ action: "getStatus", id: String(id) });
 }

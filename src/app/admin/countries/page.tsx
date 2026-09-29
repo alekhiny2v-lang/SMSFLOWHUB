@@ -87,6 +87,25 @@ interface RateRow {
   savedId: number | null;
 }
 
+interface RateHealthRow {
+  countryId: number;
+  name: string;
+  code: string;
+  smsbowerCountryId: number | null;
+  status: "ok" | "rate_below_cost" | "no_stock" | "no_live_data";
+  rate: number | null;
+  cheapestCostPkr: number | null;
+  stock: number;
+  gapPkr: number | null;
+  providers: Array<{ providerId: number; count: number; costPkr: number; pkrPrice: number; sellable: boolean }>;
+}
+
+interface RateHealth {
+  counts: { total: number; ok: number; rateBelowCost: number; noStock: number; noLiveData: number };
+  results: RateHealthRow[];
+  fetchedAt: string;
+}
+
 type Tab = "catalogue" | "rates" | "fetch";
 
 const emptyForm = {
@@ -158,6 +177,10 @@ export default function AdminCountries() {
   const [providerIdsDraft, setProviderIdsDraft] = useState("");
   const [newProviderId, setNewProviderId] = useState("");
 
+  // ── Rate health: countries whose rate no longer covers the live price ──
+  const [health, setHealth] = useState<RateHealth | null>(null);
+  const [healthLoading, setHealthLoading] = useState(false);
+
   // ── Pricing settings ──
   const [usdToPkr, setUsdToPkr] = useState("280");
   const [defaultProfit, setDefaultProfit] = useState("7");
@@ -178,8 +201,21 @@ export default function AdminCountries() {
     [],
   );
 
+  /** Advisory rate check — refreshed on demand from the health panel. */
+  const loadHealth = useCallback(() => {
+    setHealthLoading(true);
+    return apiFetch<RateHealth>("/api/admin/rate-health?service=fb")
+      .then(setHealth)
+      .catch(() => {})
+      .finally(() => setHealthLoading(false));
+  }, []);
+
   useEffect(() => {
     load();
+    // Advisory: never block (or fail) the catalogue on the live-price check.
+    apiFetch<RateHealth>("/api/admin/rate-health?service=fb")
+      .then(setHealth)
+      .catch(() => {});
     apiFetch<{ usdToPkr: number; defaultProfitPkr: number }>("/api/admin/settings")
       .then((data) => {
         setUsdToPkr(String(data.usdToPkr));
@@ -829,6 +865,91 @@ export default function AdminCountries() {
               </div>
             </form>
           </div>
+
+          {/* Rate health: stock the panel cannot sell at the current rate */}
+          {health && (
+            <div className="mt-8">
+              {health.counts.rateBelowCost > 0 ? (
+                <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 lg:p-5">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl leading-none mt-0.5">⚠️</span>
+                      <div>
+                        <p className="font-bold text-white">
+                          {health.counts.rateBelowCost} {health.counts.rateBelowCost === 1 ? "country" : "countries"} can&apos;t be sold —
+                          the selling rate is below the live provider price
+                        </p>
+                        <p className="text-xs text-fg-soft mt-1 max-w-2xl">
+                          These countries <span className="font-semibold">do</span> have stock, but SMSBOWER rejects every order above the
+                          price cap we send, so clients are shown &ldquo;out of stock&rdquo;. Raise the selling rate by the gap below (or set
+                          a flat profit instead of a fixed price) to sell them again.
+                        </p>
+                      </div>
+                    </div>
+                    <button onClick={() => void loadHealth()} disabled={healthLoading} className="btn-ghost py-2!">
+                      {healthLoading ? "Checking…" : "⟳ Re-check live prices"}
+                    </button>
+                  </div>
+
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full text-left min-w-[620px]">
+                      <thead>
+                        <tr>
+                          <th className="th">Country</th>
+                          <th className="th">Your rate</th>
+                          <th className="th">Live cheapest cost</th>
+                          <th className="th">Needed increase</th>
+                          <th className="th">Stock waiting</th>
+                          <th className="th">Fix</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {health.results
+                          .filter((row) => row.status === "rate_below_cost")
+                          .map((row) => (
+                            <tr key={row.countryId} className="tr-hover">
+                              <td className="td">
+                                <span className="flex items-center gap-2.5">
+                                  <span className="text-xl leading-none">{getCountryFlag(row.code || row.name)}</span>
+                                  <span className="font-semibold text-white">{row.name}</span>
+                                </span>
+                              </td>
+                              <td className="td tabular-nums text-muted">{pkr(row.rate)}</td>
+                              <td className="td tabular-nums text-red-300 font-semibold">{pkr(row.cheapestCostPkr)}</td>
+                              <td className="td tabular-nums text-brand-soft font-bold">
+                                {row.gapPkr !== null && row.gapPkr > 0 ? `+${pkr(Math.ceil(row.gapPkr))}` : "—"}
+                              </td>
+                              <td className="td tabular-nums text-muted">{row.stock.toLocaleString()}</td>
+                              <td className="td">
+                                <button
+                                  onClick={() => {
+                                    const c = countries.find((x) => x.id === row.countryId);
+                                    if (c) edit(c);
+                                  }}
+                                  className="text-[11px] font-bold px-2.5 py-1.5 rounded-lg bg-brand/15 hover:bg-brand/25 text-brand-soft border border-brand/30 transition"
+                                >
+                                  Edit rate
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+                  <p className="text-sm text-emerald-200">
+                    ✅ Every active country&apos;s rate covers its live provider price ({health.counts.ok} ready to sell
+                    {health.counts.noStock > 0 ? `, ${health.counts.noStock} genuinely out of stock` : ""}).
+                  </p>
+                  <button onClick={() => void loadHealth()} disabled={healthLoading} className="btn-ghost py-2!">
+                    {healthLoading ? "Checking…" : "⟳ Re-check"}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Catalogue table */}
           <div className="flex items-center justify-between gap-3 mt-8 mb-4 flex-wrap">

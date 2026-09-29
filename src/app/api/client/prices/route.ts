@@ -5,7 +5,7 @@ import { countries, countryProviderRates, userCountryRates } from "@/db/schema";
 import { requireAuth } from "@/lib/auth";
 import { getCountryFlag } from "@/lib/country";
 import { getPricingSettings, pickCheapestProvider, roundPkr, sellingPricePkr } from "@/lib/pricing";
-import { buildCountryStock, loadStockBoard, parseProviderIds, type ProviderQuote } from "@/lib/providers";
+import { buildCountryStock, isSellable, loadStockBoard, parseProviderIds, type ProviderQuote } from "@/lib/providers";
 
 /**
  * Live client price board.
@@ -84,18 +84,39 @@ export async function GET(req: NextRequest) {
           }
         }
 
-        const best = pickCheapestProvider(providers);
-        const usdPrice = best ? best.usdPrice : null;
-        const count = providers.length ? providers.reduce((sum, p) => sum + p.count, 0) : null;
-
         const countryProfit =
           country.profitPkr === null || country.profitPkr === undefined ? null : Number(country.profitPkr);
         const markup = Number(country.markupPercent) || 0;
 
         // Priority 1: user-specific custom rate
         const customPrice = customRateMap.get(Number(country.id));
+        const hasCustomRate = customPrice !== undefined && Number.isFinite(customPrice);
         // Priority 2: fixed country selling price
         const fixedCountry = country.sellingPkrPrice ? Number(country.sellingPkrPrice) : null;
+        // The rate every provider on this country is sold at, when one is fixed
+        // for the whole country (custom rate / fixed price). Null = live pricing.
+        const rowRate = hasCustomRate ? roundPkr(Number(customPrice)) : fixedCountry ? roundPkr(fixedCountry) : null;
+
+        /** What this provider would be sold for right now. */
+        const salePriceOf = (quote: ProviderQuote) => rowRate ?? quote.pkrPrice;
+
+        /**
+         * Stock we can actually order.
+         *
+         * A listing whose price no longer covers the provider's cost cannot be
+         * bought: the aggregator answers `NO_NUMBERS` to every attempt, so the
+         * client is told "out of stock" for a country the card says is stocked.
+         * Counting only sellable providers keeps the board and the buy button
+         * in agreement — what the card advertises is what `/api/client/buy`
+         * will honour.
+         */
+        const buyable = providers.filter((quote) => isSellable(quote, salePriceOf(quote)));
+        const rateUnavailable = providers.length > 0 && buyable.length === 0;
+
+        const best = pickCheapestProvider(buyable);
+        const usdPrice = best ? best.usdPrice : null;
+        const count = buyable.length ? buyable.reduce((sum, p) => sum + p.count, 0) : 0;
+
         // Priority 3: cheapest live provider, priced with the country's profit
         const livePrice = best
           ? sellingPricePkr({
@@ -111,16 +132,14 @@ export async function GET(req: NextRequest) {
         let isCustomRate = false;
         let isFixedRate = false;
 
-        if (customPrice !== undefined && Number.isFinite(customPrice)) {
-          pkrPrice = roundPkr(customPrice);
+        if (hasCustomRate) {
+          pkrPrice = rowRate;
           isCustomRate = true;
         } else if (fixedCountry) {
-          pkrPrice = roundPkr(fixedCountry);
+          pkrPrice = rowRate;
           isFixedRate = true;
         } else if (livePrice !== null) {
           pkrPrice = livePrice;
-        } else if (countryProfit !== null || markup > 0) {
-          pkrPrice = null;
         }
 
         return {
@@ -139,12 +158,13 @@ export async function GET(req: NextRequest) {
           isFixedRate,
           liveName,
           bestProviderId: best ? best.providerId : null,
-          providers: providers.map((p) => ({
+          rateUnavailable,
+          providers: buyable.map((p) => ({
             providerId: p.providerId,
             usdPrice: p.usdPrice,
             count: p.count,
             costPkr: p.costPkr,
-            pkrPrice: isCustomRate || isFixedRate ? pkrPrice : p.pkrPrice,
+            pkrPrice: rowRate ?? p.pkrPrice,
           })),
         };
       })

@@ -33,6 +33,9 @@ interface Price {
   bestProviderId?: number | null;
   isCustomRate?: boolean;
   isFixedRate?: boolean;
+  /** True when the listed rate no longer covers any provider's live price —
+      the country has stock, but nothing can be ordered at this price. */
+  rateUnavailable?: boolean;
 }
 
 interface Activation {
@@ -315,6 +318,7 @@ const CountryCard = memo(function CountryCard({
 }) {
   const stock = p.count ?? 0;
   const outOfStock = stock <= 0;
+  const rateUnavailable = Boolean(p.rateUnavailable);
 
   return (
     <div
@@ -343,6 +347,11 @@ const CountryCard = memo(function CountryCard({
           <p className="text-[11px] text-muted uppercase tracking-wider font-semibold mb-0.5">Price</p>
           <p className="text-2xl font-bold text-white tabular-nums">{formatPkr(p.pkrPrice)}</p>
           <p className="text-[11px] text-muted">{p.isCustomRate ? "your custom rate" : p.isFixedRate ? "fixed rate" : "per number"}</p>
+          {rateUnavailable && (
+            <p className="text-[11px] text-brand-soft font-semibold mt-1" title="Live provider prices are above this rate, so orders here are rejected. Ask support, or pick another country.">
+              Rate below live cost
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="text-[11px] text-muted uppercase tracking-wider font-semibold mb-0.5">In stock</p>
@@ -356,6 +365,7 @@ const CountryCard = memo(function CountryCard({
           >
             {outOfStock ? "None" : p.count}
           </p>
+          {rateUnavailable && !outOfStock && <p className="text-[11px] text-muted">not orderable</p>}
         </div>
       </div>
 
@@ -376,6 +386,8 @@ const CountryCard = memo(function CountryCard({
             <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white/70" />
             Reserving number…
           </>
+        ) : rateUnavailable ? (
+          "Rate Unavailable"
         ) : outOfStock ? (
           "Out of Stock"
         ) : (
@@ -465,6 +477,7 @@ function PinnedBuyBox({
 
   const stock = selected?.count ?? 0;
   const outOfStock = !selected || stock <= 0;
+  const rateUnavailable = Boolean(selected?.rateUnavailable);
   const insufficient = Boolean(selected && balance !== null && balance < selected.pkrPrice);
   const busy = buyingId !== null;
 
@@ -506,7 +519,7 @@ function PinnedBuyBox({
                 {selected ? formatPkr(selected.pkrPrice) : ""}
               </span>
               <span className={`text-[11px] font-bold shrink-0 tabular-nums ${outOfStock ? "text-red-400" : "text-emerald-400"}`}>
-                {loading ? "" : outOfStock ? "0 left" : `${stock} left`}
+                {loading ? "" : rateUnavailable ? "rate unavailable" : outOfStock ? "0 left" : `${stock} left`}
               </span>
               <span className={`text-muted text-xs transition-transform shrink-0 ${expanded ? "rotate-180" : ""}`}>▾</span>
             </button>
@@ -521,7 +534,13 @@ function PinnedBuyBox({
             <button
               onClick={() => selected && onBuy(selected.id)}
               disabled={busy || !selected || outOfStock}
-              title={outOfStock ? "This country is out of stock — pick another" : undefined}
+              title={
+                rateUnavailable
+                  ? "Provider prices are above this country's rate right now — pick another country"
+                  : outOfStock
+                    ? "This country is out of stock — pick another"
+                    : undefined
+              }
               className="shrink-0 flex-none w-auto lg:w-[224px] brand-gradient text-ink rounded-xl px-3.5 lg:px-4 py-2 lg:py-2.5 font-bold text-xs lg:text-sm shadow-lg shadow-brand/25 transition hover:brightness-110 active:scale-[0.99] disabled:opacity-45 disabled:cursor-not-allowed disabled:hover:brightness-100 btn-shine flex items-center justify-center gap-1.5 lg:gap-2"
             >
               {buyingId === selected?.id ? (
@@ -532,7 +551,7 @@ function PinnedBuyBox({
               ) : (
                 <>
                   <FacebookLogo size={14} variant="glyph" accessible={false} />
-                  <span>{outOfStock ? "Out of stock" : insufficient ? "Top up to buy" : "Buy now"}</span>
+                  <span>{rateUnavailable ? "Rate unavailable" : outOfStock ? "Out of stock" : insufficient ? "Top up to buy" : "Buy now"}</span>
                   <span className="hidden lg:inline tabular-nums">
                     {outOfStock || insufficient ? "" : selected ? `· ${selected.pkrPrice.toFixed(2)}` : ""}
                   </span>
@@ -604,7 +623,7 @@ function PinnedBuyBox({
                           </span>
                         </span>
                         <span className={`text-[11px] font-bold tabular-nums shrink-0 hidden sm:block ${count > 0 ? "text-emerald-400" : "text-red-400"}`}>
-                          {count > 0 ? `${count} in stock` : "out of stock"}
+                          {p.rateUnavailable ? "rate unavailable" : count > 0 ? `${count} in stock` : "out of stock"}
                         </span>
                       </button>
                       <span className="text-sm font-bold text-white tabular-nums shrink-0">{formatPkr(p.pkrPrice)}</span>
